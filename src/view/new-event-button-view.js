@@ -1,12 +1,13 @@
 import {createElement} from '../render.js';
 
-function createEventSectionOffersTemplate() {
-  return '<section class="event__section  event__section--offers"></section>';
+function createNewEventButtonTemplate() {
+  return '<button class="trip-main__event-add-btn  btn  btn--big  btn--yellow" type="button">New event</button>';
 }
 
-export default class EventSectionOffers {
+export default class NewEventButtonView {
+
   getTemplate() {
-    return createEventSectionOffersTemplate();
+    return createNewEventButtonTemplate();
   }
 
   getElement() {
@@ -21,5 +22,3 @@ export default class EventSectionOffers {
     this.element = null;
   }
 }
-
-
