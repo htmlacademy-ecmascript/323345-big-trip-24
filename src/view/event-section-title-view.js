@@ -3,7 +3,7 @@ import {createElement} from '../render.js';
 const titleOptions = ['Offers', 'Destination'];
 
 
-function createEventSectionTitleTemplate(i) {
+function createEventSectionTitleTemplate() {
   return `<h3 class="event__section-title  event__section-title--offers">${titleOptions[0]}</h3>`;
 }
 
