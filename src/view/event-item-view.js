@@ -1,10 +1,12 @@
 import {createElement} from '../render.js';
-import {humanizeEventDueDate} from '../utils.js';
+import {humanizeEventDate, diffTime} from '../utils.js';
 
 function createEventItemTemplate(event) {
-  const {title, icon, price, eventStartTime, eventEndtTime, offers, dueDate} = event;
+  const {title, icon, price, eventStartTime, eventEndtTime, offers} = event;
 
-  const date = humanizeEventDueDate(dueDate);
+  const date = humanizeEventDate(eventStartTime, 'date');
+  const startTime = humanizeEventDate(eventStartTime);
+  const endTime = humanizeEventDate(eventEndtTime);
 
   return (
     `<li class="trip-events__item">
@@ -16,11 +18,11 @@ function createEventItemTemplate(event) {
                 <h3 class="event__title">${title}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
-                    <time class="event__start-time" datetime="${eventStartTime}">${eventStartTime.slice(11, 16)}</time>
+                    <ime class="event__start-time" datetime="${eventStartTime}">${startTime}</time>
                     —
-                    <time class="event__end-time" datetime="${eventEndtTime}">${eventStartTime.slice(11, 16)}</time>
+                    <time class="event__end-time" datetime="${eventEndtTime}">${endTime}</time>
                   </p>
-                  <p class="event__duration">30M</p>
+                  <p class="event__duration">${diffTime(eventStartTime, eventEndtTime)}</p>
                 </div>
                 <p class="event__price">
                   €&nbsp;<span class="event__price-value">${price}</span>
@@ -28,9 +30,9 @@ function createEventItemTemplate(event) {
                 <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
                   <li class="event__offer">
-                    <span class="event__offer-title">${offers.title}</span>
+                    <span class="event__offer-title">${offers.map((element) => element.title)}</span>
                     +€&nbsp;
-                    <span class="event__offer-price">${offers.price}</span>
+                    <span class="event__offer-price">${offers.map((element) => element.price)}</span>
                   </li>
                 </ul>
                 <button class="event__favorite-btn event__favorite-btn--active" type="button">

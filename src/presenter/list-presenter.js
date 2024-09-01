@@ -8,7 +8,6 @@ import EditPointView from '../view/edit-poit-view.js';
 import TripEventsMessage from '../view/trip-events-message-view.js';
 
 export default class ListPresenter {
-
   listComponent = new TripEventListView();
 
   constructor({ listContainer, eventModel }) {
@@ -20,7 +19,6 @@ export default class ListPresenter {
     this.listEvents = [...this.eventModel.getEvents()];
 
     render(new SortButtonView(), this.listContainer);
-    render(new EventItemView(), this.listContainer);
     render(new AddNewPointView(), this.listContainer);
     render(new EditPointView(), this.listContainer);
     render(this.listComponent, this.listContainer);

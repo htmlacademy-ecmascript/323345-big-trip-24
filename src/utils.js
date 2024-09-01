@@ -10,15 +10,26 @@ function getRandomArrayElement(items) {
 }
 
 const DATE_FORMAT = 'MMM DD';
+const TIME_FORMAT = 'HH:mm';
 
 /**
  * Returns a humanized representation of a given due date.
  * @param {string} dueDate - Due date in ISO format.
  * @returns {string} - Humanized representation of given due date, or empty string if due date is not given.
  */
-function humanizeEventDueDate(dueDate) {
-  return dueDate ? dayjs(dueDate).format(DATE_FORMAT).toUpperCase() : '';
+function humanizeEventDate(eventDate, format) {
+  if (format === 'date') {
+    return eventDate ? dayjs(eventDate).format(DATE_FORMAT).toUpperCase() : '';
+  }
+  return eventDate ? dayjs(eventDate).format(TIME_FORMAT).toUpperCase() : '';
 }
 
+function diffTime(startTime, endTime) {
+  let time = dayjs(endTime).diff(startTime, 'm');
+  if (time > 60) {
+    time = `${Math.floor(time / 60)}H ${time % 60}M`;
+  }
+  return time;
+}
 
-export {getRandomArrayElement, humanizeEventDueDate};
+export {getRandomArrayElement, humanizeEventDate, diffTime};
