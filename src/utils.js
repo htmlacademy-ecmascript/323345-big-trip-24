@@ -26,6 +26,9 @@ function humanizeEventDate(eventDate, format) {
 
 function diffTime(startTime, endTime) {
   let time = dayjs(endTime).diff(startTime, 'm');
+  if (time > 1440) {
+    time = `${Math.floor(time / 1440)}D ${Math.floor(time / 60)}H ${time % 60}M`;
+  }
   if (time > 60) {
     time = `${Math.floor(time / 60)}H ${time % 60}M`;
   }

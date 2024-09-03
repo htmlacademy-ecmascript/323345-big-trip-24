@@ -1,38 +1,41 @@
 import {createElement} from '../render.js';
 import {humanizeEventDate, diffTime} from '../utils.js';
 
-function createEventItemTemplate(event) {
-  const {title, icon, price, eventStartTime, eventEndtTime, offers} = event;
+function createOffersTemplate(offers) {
+  return `${offers.map((offer) =>`${offer.title} +€&nbsp; ${offer.price}</br>`).join('')}`;
+}
 
-  const date = humanizeEventDate(eventStartTime, 'date');
-  const startTime = humanizeEventDate(eventStartTime);
-  const endTime = humanizeEventDate(eventEndtTime);
+
+function createEventItemTemplate(obj) {
+  const {basePrice = obj.basePrice, dateFrom = obj.dateFrom, dateTo = obj.dateTo, offers = obj.offers, type = obj.basePrice, destinationPicture = obj.destinationPicture} = obj;
+
+  const date = humanizeEventDate(dateFrom, 'date');
+  const startTime = humanizeEventDate(dateFrom);
+  const endTime = humanizeEventDate(dateTo);
 
   return (
     `<li class="trip-events__item">
               <div class="event">
-                <time class="event__date" datetime="${eventStartTime}">${date}</time>
+                <time class="event__date" datetime="${dateFrom}">${date}</time>
                 <div class="event__type">
-                  <img class="event__type-icon" width="42" height="42" src="${icon}" alt="Event type icon">
+                  <img class="event__type-icon" width="42" height="42" src="${destinationPicture}" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${title}</h3>
+                <h3 class="event__title">${type}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
-                    <ime class="event__start-time" datetime="${eventStartTime}">${startTime}</time>
+                    <ime class="event__start-time" datetime="${dateFrom}">${startTime}</time>
                     —
-                    <time class="event__end-time" datetime="${eventEndtTime}">${endTime}</time>
+                    <time class="event__end-time" datetime="${dateTo}">${endTime}</time>
                   </p>
-                  <p class="event__duration">${diffTime(eventStartTime, eventEndtTime)}</p>
+                  <p class="event__duration">${diffTime(dateFrom, dateTo)}</p>
                 </div>
                 <p class="event__price">
-                  €&nbsp;<span class="event__price-value">${price}</span>
+                  €&nbsp;<span class="event__price-value">${basePrice}</span>
                 </p>
                 <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
                   <li class="event__offer">
-                    <span class="event__offer-title">${offers.map((element) => element.title)}</span>
-                    +€&nbsp;
-                    <span class="event__offer-price">${offers.map((element) => element.price)}</span>
+                    <span class="event__offer-title">${createOffersTemplate(offers)}</span>
                   </li>
                 </ul>
                 <button class="event__favorite-btn event__favorite-btn--active" type="button">
@@ -50,12 +53,12 @@ function createEventItemTemplate(event) {
 }
 
 export default class EventItemView {
-  constructor({event}) {
-    this.event = event;
+  constructor({obj}) {
+    this.obj = obj;
   }
 
   getTemplate() {
-    return createEventItemTemplate(this.event);
+    return createEventItemTemplate(this.obj);
   }
 
   getElement() {
