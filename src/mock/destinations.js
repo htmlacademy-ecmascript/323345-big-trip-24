@@ -1,4 +1,4 @@
-const destionations = [
+const destinations = [
   {
     'id': 'f81cb09d-8504-4e61-99ea-5e2169a418d3',
     'description': 'Paris - a true asian pearl',
@@ -107,4 +107,4 @@ const destionations = [
 ];
 
 
-export {destionations};
+export {destinations};

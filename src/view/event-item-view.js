@@ -1,8 +1,20 @@
 import {createElement} from '../render.js';
-import {humanizeEventDate, diffTime} from '../utils.js';
+import {humanizeEventDate, getDuration} from '../utils.js';
 
 function createOffersTemplate(offers) {
-  return `${offers.map((offer) =>`${offer.title} +€&nbsp; ${offer.price}</br>`).join('')}`;
+  return offers ?
+    (`
+    <ul class="event__selected-offers">
+    ${offers.map(({title, price}) => (`
+    <li class="event__offer">
+      <span class="event__offer-title">${title}</span>
+      &plus;&euro;&nbsp;
+      <span class="event__offer-price">${price}</span>
+    </li>
+    `)).join('')}
+    </ul>
+  `) :
+    '';
 }
 
 
@@ -27,7 +39,7 @@ function createEventItemTemplate(obj) {
                     —
                     <time class="event__end-time" datetime="${dateTo}">${endTime}</time>
                   </p>
-                  <p class="event__duration">${diffTime(dateFrom, dateTo)}</p>
+                  <p class="event__duration">${getDuration(dateFrom, dateTo)}</p>
                 </div>
                 <p class="event__price">
                   €&nbsp;<span class="event__price-value">${basePrice}</span>

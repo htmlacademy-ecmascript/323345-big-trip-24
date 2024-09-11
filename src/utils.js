@@ -24,7 +24,7 @@ function humanizeEventDate(eventDate, format) {
   return eventDate ? dayjs(eventDate).format(TIME_FORMAT).toUpperCase() : '';
 }
 
-function diffTime(startTime, endTime) {
+function getDuration(startTime, endTime) {
   let time = dayjs(endTime).diff(startTime, 'm');
   if (time > 1440) {
     time = `${Math.floor(time / 1440)}D ${Math.floor(time / 60)}H ${time % 60}M`;
@@ -35,4 +35,4 @@ function diffTime(startTime, endTime) {
   return time;
 }
 
-export {getRandomArrayElement, humanizeEventDate, diffTime};
+export {getRandomArrayElement, humanizeEventDate, getDuration};
