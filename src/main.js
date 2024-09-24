@@ -15,8 +15,8 @@ const pointsTripModel = new PointsTripModel();
 pointsTripModel.init();
 const offersTripModel = new OffersTripsModel();
 offersTripModel.init();
-const destionationsTripModel = new DestinationsTripModel();
-destionationsTripModel.init();
+const destinationsTripModel = new DestinationsTripModel();
+destinationsTripModel.init();
 
 render(new SectionTripInfoView(), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
 render(new NewEventButtonView(), tripMain); // Заголовок, кнопка добавить событие
@@ -24,10 +24,11 @@ render (new TripFiltersFormView(), tripControlsFilters); // Кнопки сор�
 
 const listPresenter = new ListPresenter({
   listContainer: tripEventsElement,
-  pointsTripModel: pointsTripModel.get(),
-  destionationsTripModel: destionationsTripModel.get(),
-  offersTripModel: offersTripModel.get(),
+  pointsTripModel,
+  destinationsTripModel,
+  offersTripModel,
 });
 
 listPresenter.init();
+
 

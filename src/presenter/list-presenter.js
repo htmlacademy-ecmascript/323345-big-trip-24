@@ -13,36 +13,45 @@ import TripEventsMessage from '../view/trip-events-message-view.js';
 export default class ListPresenter {
   listComponent = new TripEventListView();
 
-  constructor({ listContainer, pointsTripModel, destionationsTripModel, offersTripModel }) {
+  constructor({ listContainer, pointsTripModel, destinationsTripModel, offersTripModel }) {
     this.listContainer = listContainer;
-    this.pointsTrip = pointsTripModel;
-    this.destionations = destionationsTripModel;
+    this.pointsTrip = pointsTripModel.get();
+    this.destinations = destinationsTripModel;
     this.offers = offersTripModel;
   }
 
   init() {
     this.listPoints = [...this.pointsTrip];
 
-    render(new SortButtonView(), this.listContainer);
-    render(new AddNewPointView(), this.listContainer);
-    render(new EditPointView(), this.listContainer);
-    render(this.listComponent, this.listContainer);
+    const tripEventData = (item) => {
+      const destination = this.destinations.getDestinationById(item);
+      const tripOffers = this.offers.getOffersByType(item);
 
-    // Создание элементов в списке
-    this.pointsTrip.forEach((item) => { // Создание элементов в списке
-      const destination = this.destionations.find((dest) => dest.id === item.destination);
-      const offersItems = this.offers.find((offer) => offer.type === item.type);
-      const obj = {
+      return ({
         basePrice: item.base_price,
         dateFrom: new Date(item.date_from),
         dateTo: new Date(item.date_to),
         destination: destination.name,
         isFavorite: item.is_favorite,
-        offers: offersItems.offers.map((offer) => ({title: offer.title, price: offer.price, id: offer.id})),
+        offers: tripOffers.offers.map((offer) => ({title: offer.title, price: offer.price, id: offer.id})),
         type: item.type,
-        destinationPicture: `./img/icons/${offersItems.type}.png`,
-      };
-      render (new EventItemView({obj}), this.listComponent.getElement());
+        destinationPicture: tripOffers.type,
+      });
+    };
+
+    render(new SortButtonView(), this.listContainer);
+    render(new AddNewPointView({pointsTrip: this.listPoints, offers: this.offers}), this.listContainer);
+
+    render(new EditPointView(
+      tripEventData(this.pointsTrip[0]),
+      this.destinations.getDestinationById(this.pointsTrip[0])
+    ), this.listContainer);
+    render(this.listComponent, this.listContainer);
+
+    // Создание элементов в списке
+    this.listPoints.forEach((item) => { // Создание элементов в списке
+
+      render (new EventItemView({tripEventData: tripEventData(item)}), this.listComponent.getElement());
     });
 
 

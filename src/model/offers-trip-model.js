@@ -1,7 +1,7 @@
 import {offers} from '../mock/offers.js';
 export default class OffersTripsModel {
-  constructor() {
-    this.data = undefined;
+  constructor(data) {
+    this.data = data;
   }
 
   init() {
@@ -10,5 +10,9 @@ export default class OffersTripsModel {
 
   get() {
     return this.data;
+  }
+
+  getOffersByType(points) {
+    return this.data.find((offer) => offer.type === points.type);
   }
 }

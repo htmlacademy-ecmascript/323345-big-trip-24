@@ -1,12 +1,16 @@
 import {destinations} from '../mock/destinations.js';
 
 export default class DestinationsTripModel {
-  constructor() {
-    this.data = undefined;
+  constructor(data) {
+    this.data = data;
   }
 
   init() {
     this.data = destinations;
+  }
+
+  getDestinationById(points) {
+    return this.data.find((dest) => dest.id === points.destination);
   }
 
   get() {

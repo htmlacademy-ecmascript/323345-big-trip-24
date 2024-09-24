@@ -18,8 +18,8 @@ function createOffersTemplate(offers) {
 }
 
 
-function createEventItemTemplate(obj) {
-  const {basePrice = obj.basePrice, dateFrom = obj.dateFrom, dateTo = obj.dateTo, offers = obj.offers, type = obj.basePrice, destinationPicture = obj.destinationPicture} = obj;
+function createEventItemTemplate(tripEventData) {
+  const {basePrice = tripEventData.basePrice, dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, offers = tripEventData.offers, type = tripEventData.basePrice, destinationPicture = tripEventData.destinationPicture} = tripEventData;
 
   const date = humanizeEventDate(dateFrom, 'date');
   const startTime = humanizeEventDate(dateFrom);
@@ -30,9 +30,9 @@ function createEventItemTemplate(obj) {
               <div class="event">
                 <time class="event__date" datetime="${dateFrom}">${date}</time>
                 <div class="event__type">
-                  <img class="event__type-icon" width="42" height="42" src="${destinationPicture}" alt="Event type icon">
+                  <img class="event__type-icon" width="42" height="42" src="./img/icons/${destinationPicture}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${type}</h3>
+                <h3 class="event__title">${type} ${destination}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
                     <ime class="event__start-time" datetime="${dateFrom}">${startTime}</time>
@@ -65,12 +65,12 @@ function createEventItemTemplate(obj) {
 }
 
 export default class EventItemView {
-  constructor({obj}) {
-    this.obj = obj;
+  constructor({tripEventData}) {
+    this.tripEventData = tripEventData;
   }
 
   getTemplate() {
-    return createEventItemTemplate(this.obj);
+    return createEventItemTemplate(this.tripEventData);
   }
 
   getElement() {

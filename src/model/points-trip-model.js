@@ -1,8 +1,8 @@
 import {points} from '../mock/points.js';
 
 export default class PointsTripModel {
-  constructor() {
-    this.data = undefined;
+  constructor(data) {
+    this.data = data;
   }
 
   init() {
