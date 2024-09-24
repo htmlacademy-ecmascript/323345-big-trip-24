@@ -22,10 +22,7 @@ const FORMATS = {
  * @returns {string} - Humanized representation of given due date, or empty string if due date is not given.
  */
 function humanizeEventDate(eventDate, format) {
-  if (format === 'date') {
-    return eventDate ? dayjs(eventDate).format(DATE_FORMAT).toUpperCase() : '';
-  }
-  return eventDate ? dayjs(eventDate).format(TIME_FORMAT).toUpperCase() : '';
+  return eventDate ? dayjs(eventDate).format(FORMATS[format]).toUpperCase() : '';
 }
 
 /**

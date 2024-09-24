@@ -22,8 +22,8 @@ function createEventItemTemplate(tripEventData) {
   const {basePrice = tripEventData.basePrice, dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, offers = tripEventData.offers, type = tripEventData.basePrice, destinationPicture = tripEventData.destinationPicture} = tripEventData;
 
   const date = humanizeEventDate(dateFrom, 'date');
-  const startTime = humanizeEventDate(dateFrom);
-  const endTime = humanizeEventDate(dateTo);
+  const startTime = humanizeEventDate(dateFrom, 'time');
+  const endTime = humanizeEventDate(dateTo, 'time');
 
   return (
     `<li class="trip-events__item">

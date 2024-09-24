@@ -44,7 +44,8 @@ export default class ListPresenter {
 
     render(new EditPointView(
       tripEventData(this.pointsTrip[0]),
-      this.destinations.getDestinationById(this.pointsTrip[0])
+      this.destinations.getDestinationById(this.pointsTrip[0]),
+      {allDestinations: this.destinations}
     ), this.listContainer);
     render(this.listComponent, this.listContainer);
 

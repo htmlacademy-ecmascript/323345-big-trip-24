@@ -77,12 +77,22 @@ function createEventTypeList() {
   `);
 }
 
-function createEditPointTemplate(tripEventData, destinations) {
-  const {dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, offers = tripEventData.offers, type = tripEventData.type, destinationPicture = tripEventData.destinationPicture} = tripEventData;
+function destinationsList(destinations) {
+
+  return (`
+    <datalist id="destination-list-1">
+     ${destinations.map((destination) => (`
+      <option value="${destination.name}"></option>
+    `)).join('')}
+    </datalist>
+  `);
+}
+
+function createEditPointTemplate(tripEventData, destinations, allDestinations) {
+  const {basePrice = tripEventData.basePrice, dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, type = tripEventData.type, destinationPicture = tripEventData.destinationPicture} = tripEventData;
 
   const timeStart = humanizeEventDate(dateFrom, 'eventTime');
   const timeEnd = humanizeEventDate(dateTo, 'eventTime');
-
   return (`
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
@@ -101,11 +111,9 @@ function createEditPointTemplate(tripEventData, destinations) {
           ${type}
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
-          <datalist id="destination-list-1">
-            <option value="Amsterdam"></option>
-            <option value="Geneva"></option>
-            <option value="Chamonix"></option>
-          </datalist>
+
+            ${destinationsList(allDestinations.allDestinations.data)}
+
         </div>
 
         <div class="event__field-group  event__field-group--time">
@@ -121,7 +129,7 @@ function createEditPointTemplate(tripEventData, destinations) {
             <span class="visually-hidden">Price</span>
             €
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="160">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -142,13 +150,14 @@ function createEditPointTemplate(tripEventData, destinations) {
 }
 
 export default class EditPointView {
-  constructor(tripEventData, destinations) {
+  constructor(tripEventData, destinations, allDestinations) {
     this.tripEventData = tripEventData;
     this.destinations = destinations;
+    this.allDestinations = allDestinations;
   }
 
   getTemplate() {
-    return createEditPointTemplate(this.tripEventData, this.destinations);
+    return createEditPointTemplate(this.tripEventData, this.destinations, this.allDestinations);
   }
 
   getElement() {
