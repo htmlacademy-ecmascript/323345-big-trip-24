@@ -164,8 +164,13 @@ function createAddNewPointTemplate() {
 }
 
 export default class AddNewPointView {
+
+  constructor() {
+    // this.obj = obj;
+  }
+
   getTemplate() {
-    return createAddNewPointTemplate();
+    return createAddNewPointTemplate(this.obj);
   }
 
   getElement() {
