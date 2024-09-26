@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createAddNewPointTemplate() {
   return `<form class="event event--edit" action="#" method="post">
@@ -163,25 +163,18 @@ function createAddNewPointTemplate() {
               </form>`;
 }
 
-export default class AddNewPointView {
+export default class AddNewPointView extends AbstractView {
 
-  constructor() {
-    // this.obj = obj;
+  #pointsTrip;
+  #offers;
+
+  constructor(pointsTrip, offers) {
+    super();
+    this.#pointsTrip = pointsTrip;
+    this.#offers = offers;
   }
 
-  getTemplate() {
-    return createAddNewPointTemplate(this.obj);
-  }
-
-  getElement() {
-    if(!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createAddNewPointTemplate(this.#pointsTrip, this.#offers);
   }
 }

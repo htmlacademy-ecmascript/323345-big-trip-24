@@ -1,5 +1,5 @@
-import {createElement} from '../render.js';
 import {humanizeEventDate, getDuration} from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(offers) {
   return offers ?
@@ -19,6 +19,7 @@ function createOffersTemplate(offers) {
 
 
 function createEventItemTemplate(tripEventData) {
+
   const {basePrice = tripEventData.basePrice, dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, offers = tripEventData.offers, type = tripEventData.basePrice, destinationPicture = tripEventData.destinationPicture} = tripEventData;
 
   const date = humanizeEventDate(dateFrom, 'date');
@@ -64,24 +65,17 @@ function createEventItemTemplate(tripEventData) {
   );
 }
 
-export default class EventItemView {
-  constructor({tripEventData}) {
-    this.tripEventData = tripEventData;
+export default class EventItemView extends AbstractView {
+
+  #tripEventData;
+
+  constructor(tripEventData) {
+    super();
+    this.#tripEventData = tripEventData;
   }
 
-  getTemplate() {
-    return createEventItemTemplate(this.tripEventData);
-  }
+  get template() {
 
-  getElement() {
-    if(!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+    return createEventItemTemplate(this.#tripEventData);
   }
 }

@@ -1,9 +1,9 @@
-import {createElement} from '../render.js';
 import {EVENT_TYPES} from '../const.js';
 import { humanizeEventDate, capitalizeFirstLetter } from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(tripEventData) {
-
+  // console.log(tripEventData);
   if (tripEventData.offers.length > 0) {
 
     const selectedOffers = tripEventData.offers;
@@ -77,7 +77,7 @@ function createEventTypeList() {
   `);
 }
 
-function destinationsList(destinations) {
+function destinationsList({destinations}) {
 
   return (`
     <datalist id="destination-list-1">
@@ -89,10 +89,11 @@ function destinationsList(destinations) {
 }
 
 function createEditPointTemplate(tripEventData, destinations, allDestinations) {
-  const {basePrice = tripEventData.basePrice, dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, type = tripEventData.type, destinationPicture = tripEventData.destinationPicture} = tripEventData;
 
+  const {basePrice = tripEventData.basePrice, dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, type = tripEventData.type, destinationPicture = tripEventData.destinationPicture} = tripEventData;
   const timeStart = humanizeEventDate(dateFrom, 'eventTime');
   const timeEnd = humanizeEventDate(dateTo, 'eventTime');
+
   return (`
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
@@ -112,7 +113,7 @@ function createEditPointTemplate(tripEventData, destinations, allDestinations) {
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
 
-            ${destinationsList(allDestinations.allDestinations.data)}
+            ${destinationsList(allDestinations)}
 
         </div>
 
@@ -149,27 +150,22 @@ function createEditPointTemplate(tripEventData, destinations, allDestinations) {
     `);
 }
 
-export default class EditPointView {
-  constructor(tripEventData, destinations, allDestinations) {
-    this.tripEventData = tripEventData;
-    this.destinations = destinations;
-    this.allDestinations = allDestinations;
+export default class EditPointView extends AbstractView {
+
+  #tripEventData;
+  #destinations;
+  #allDestinations;
+
+  constructor(tripEventData, destinations, {allDestinations}) {
+    super();
+    this.#tripEventData = tripEventData;
+    this.#destinations = destinations;
+    this.#allDestinations = allDestinations;
   }
 
-  getTemplate() {
-    return createEditPointTemplate(this.tripEventData, this.destinations, this.allDestinations);
-  }
+  get template() {
 
-  getElement() {
-    if(!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+    return createEditPointTemplate(this.#tripEventData, this.#destinations, this.#allDestinations);
   }
 }
 

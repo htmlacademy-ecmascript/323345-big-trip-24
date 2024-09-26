@@ -1,4 +1,4 @@
-import {RenderPosition, render} from './render.js';
+import { render, RenderPosition } from './framework/render.js';
 import ListPresenter from './presenter/list-presenter.js';
 import SectionTripInfoView from './view/section-trip-info-view.js';
 import NewEventButtonView from './view/new-event-button-view.js';
@@ -11,12 +11,10 @@ import DestinationsTripModel from './model/destinations-trip-model.js';
 const tripMain = document.querySelector('.trip-main');
 const tripEventsElement = document.querySelector('.trip-events');
 const tripControlsFilters = document.querySelector('.trip-controls__filters');
+
 const pointsTripModel = new PointsTripModel();
-pointsTripModel.init();
 const offersTripModel = new OffersTripsModel();
-offersTripModel.init();
 const destinationsTripModel = new DestinationsTripModel();
-destinationsTripModel.init();
 
 render(new SectionTripInfoView(), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
 render(new NewEventButtonView(), tripMain); // Заголовок, кнопка добавить событие
