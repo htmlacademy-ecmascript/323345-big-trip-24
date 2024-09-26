@@ -3,7 +3,7 @@ import { render, replace } from '../framework/render.js';
 import SortButtonView from '../view/sort-view.js';
 import TripEventListView from '../view/trip-events-list-view.js';
 import EventItemView from '../view/event-item-view.js';
-import AddNewPointView from '../view/add-new-point-view.js';
+// import AddNewPointView from '../view/add-new-point-view.js';
 import EditPointView from '../view/edit-poit-view.js';
 import TripEventsMessage from '../view/trip-events-message-view.js';
 
