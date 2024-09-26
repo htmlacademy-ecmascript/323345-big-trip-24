@@ -29,7 +29,10 @@ export default class ListPresenter {
   init() {
     this.#listPoints = [...this.#pointsTrip];
 
+    /** Переделать логику отрисовки редактируемого события */
     this.#rederTripEvent(this.#listPoints[0]);
+
+    /** Отрисовка всех компонентов */
     this.#renderList();
   }
 
@@ -53,30 +56,57 @@ export default class ListPresenter {
     return tripEventData;
   }
 
+  /** Создание события путешествия */
   #rederTripEvent(item) {
-    // const escKeyDownHandler = (evt) => {
-    //   if (evt.key === 'Escape') {
-    //     evt.preventDefault();
-    //     replaceFormToCard();
-    //     document.removeEventListener('keydown', escKeyDownHandler);
-    //   }
-    // };
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
 
-    // function replaceCardToForm() {
-    //   replace(tripPointEditComponent, tripPointComponent);
-    // }
+    const tripPointEditComponent = new EditPointView({
+      tripEventData: this.#tripEventData(item)
+      , destinations: this.#destinations.getDestinationById(item)
+      , allDestinations: this.#destinations
+      , onFormSubmit: () => {
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+      , onCloseFormClick: () => {
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    });
 
-    // function replaceFormToCard() {
-    //   replace(tripPointComponent, tripPointEditComponent);
-    // }
-    render(new EditPointView(
-      this.#tripEventData(item)
-      , this.#destinations.getDestinationById(item)
-      , {allDestinations: this.#destinations}
-    ), this.#listContainer);
+    const tripPointComponent = new EventItemView(this.#tripEventData(item)
+      , {onEditClick: () => {
+        replaceCardToForm();
+        document.addEventListener('keydown', escKeyDownHandler);
+      }
+      });
+    // console.log(tripPointComponent);
+    function replaceCardToForm() {
+      replace(tripPointEditComponent, tripPointComponent);
+    }
 
+    function replaceFormToCard() {
+      replace(tripPointComponent, tripPointEditComponent);
+    }
+
+    render (tripPointComponent, this.#listComponent.element);
   }
 
+  /** Создание списка событий путешествия */
+  #renderAllTripEvents() {
+
+    this.#listPoints.forEach((item) => {
+
+      this.#rederTripEvent(item);
+
+    });
+  }
 
   #renderList() {
     /** Рендерим список для новых событий */
@@ -90,14 +120,11 @@ export default class ListPresenter {
     /** Рендерим кнопки сортировки */
     render(new SortButtonView(), this.#listContainer);
 
-    // Создание элементов в списке
-    this.#listPoints.forEach((item) => { // Создание элементов в списке
-
-      render (new EventItemView(this.#tripEventData(item)), this.#listComponent.element);
-    });
+    /** Рендерим список событий */
+    this.#renderAllTripEvents();
 
     // Переделать логику отрисовки новой точки!
-    render(new AddNewPointView({pointsTrip: this.#listPoints, offers: this.#offers}), this.#listContainer);
+    // render(new AddNewPointView({pointsTrip: this.#listPoints, offers: this.#offers}), this.#listContainer);
   }
 
 }

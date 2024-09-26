@@ -68,14 +68,24 @@ function createEventItemTemplate(tripEventData) {
 export default class EventItemView extends AbstractView {
 
   #tripEventData;
+  #handleEditClick;
 
-  constructor(tripEventData) {
+  constructor(tripEventData, {onEditClick}) {
     super();
     this.#tripEventData = tripEventData;
+    this.#handleEditClick = onEditClick;
+
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
   }
 
   get template() {
 
     return createEventItemTemplate(this.#tripEventData);
   }
+
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }
