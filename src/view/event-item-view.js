@@ -1,5 +1,5 @@
-import {createElement} from '../render.js';
 import {humanizeEventDate, getDuration} from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(offers) {
   return offers ?
@@ -19,6 +19,7 @@ function createOffersTemplate(offers) {
 
 
 function createEventItemTemplate(tripEventData) {
+
   const {basePrice = tripEventData.basePrice, dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, offers = tripEventData.offers, type = tripEventData.basePrice, destinationPicture = tripEventData.destinationPicture} = tripEventData;
 
   const date = humanizeEventDate(dateFrom, 'date');
@@ -64,24 +65,27 @@ function createEventItemTemplate(tripEventData) {
   );
 }
 
-export default class EventItemView {
-  constructor({tripEventData}) {
-    this.tripEventData = tripEventData;
+export default class EventItemView extends AbstractView {
+
+  #tripEventData;
+  #handleEditClick;
+
+  constructor(tripEventData, {onEditClick}) {
+    super();
+    this.#tripEventData = tripEventData;
+    this.#handleEditClick = onEditClick;
+
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
   }
 
-  getTemplate() {
-    return createEventItemTemplate(this.tripEventData);
+  get template() {
+
+    return createEventItemTemplate(this.#tripEventData);
   }
 
-  getElement() {
-    if(!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }

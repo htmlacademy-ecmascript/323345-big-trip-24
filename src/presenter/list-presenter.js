@@ -1,61 +1,144 @@
-import { render } from '../render.js';
+import { render, RenderPosition, replace } from '../framework/render.js';
+
+import SectionTripInfoView from '../view/section-trip-info-view.js';
+import NewEventButtonView from '../view/new-event-button-view.js';
+import TripFiltersFormView from '../view/trip-filters-form-view.js';
 
 import SortButtonView from '../view/sort-view.js';
 import TripEventListView from '../view/trip-events-list-view.js';
 import EventItemView from '../view/event-item-view.js';
-import AddNewPointView from '../view/add-new-point-view.js';
+// import AddNewPointView from '../view/add-new-point-view.js';
 import EditPointView from '../view/edit-poit-view.js';
 import TripEventsMessage from '../view/trip-events-message-view.js';
 
-// import { destionations } from '../mock/destionations.js';
-// import { offers } from '../mock/offers.js';
+const tripMain = document.querySelector('.trip-main');
+const tripControlsFilters = document.querySelector('.trip-controls__filters');
 
 export default class ListPresenter {
-  listComponent = new TripEventListView();
+
+  #listContainer;
+  #pointsTrip;
+  #destinations;
+  #offers;
+
+  #listComponent = new TripEventListView();
+
+  #listPoints = [];
+
 
   constructor({ listContainer, pointsTripModel, destinationsTripModel, offersTripModel }) {
-    this.listContainer = listContainer;
-    this.pointsTrip = pointsTripModel.get();
-    this.destinations = destinationsTripModel;
-    this.offers = offersTripModel;
+    this.#listContainer = listContainer;
+    this.#pointsTrip = pointsTripModel.get();
+    this.#destinations = destinationsTripModel;
+    this.#offers = offersTripModel;
   }
 
   init() {
-    this.listPoints = [...this.pointsTrip];
+    this.#listPoints = [...this.#pointsTrip];
 
-    const tripEventData = (item) => {
-      const destination = this.destinations.getDestinationById(item);
-      const tripOffers = this.offers.getOffersByType(item);
+    /** Отрисовка всех компонентов */
+    this.#renderList();
+  }
 
-      return ({
-        basePrice: item.base_price,
-        dateFrom: new Date(item.date_from),
-        dateTo: new Date(item.date_to),
-        destination: destination.name,
-        isFavorite: item.is_favorite,
-        offers: tripOffers.offers.map((offer) => ({title: offer.title, price: offer.price, id: offer.id})),
-        type: item.type,
-        destinationPicture: tripOffers.type,
-      });
-    };
 
-    render(new SortButtonView(), this.listContainer);
-    render(new AddNewPointView({pointsTrip: this.listPoints, offers: this.offers}), this.listContainer);
+  #tripEventData(item) {
 
-    render(new EditPointView(
-      tripEventData(this.pointsTrip[0]),
-      this.destinations.getDestinationById(this.pointsTrip[0]),
-      {allDestinations: this.destinations}
-    ), this.listContainer);
-    render(this.listComponent, this.listContainer);
+    const destination = this.#destinations.getDestinationById(item);
+    const tripOffers = this.#offers.getOffersByType(item);
 
-    // Создание элементов в списке
-    this.listPoints.forEach((item) => { // Создание элементов в списке
-
-      render (new EventItemView({tripEventData: tripEventData(item)}), this.listComponent.getElement());
+    const tripEventData = ({
+      basePrice: item.base_price,
+      dateFrom: new Date(item.date_from),
+      dateTo: new Date(item.date_to),
+      destination: destination.name,
+      isFavorite: item.is_favorite,
+      offers: tripOffers.offers.map((offer) => ({title: offer.title, price: offer.price, id: offer.id})),
+      type: item.type,
+      destinationPicture: tripOffers.type,
     });
 
-
-    render(new TripEventsMessage(), this.listContainer);
+    return tripEventData;
   }
+
+  /** Создание события путешествия */
+  #rederTripEvent(item) {
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+
+    const tripPointEditComponent = new EditPointView({
+      tripEventData: this.#tripEventData(item)
+      , destinations: this.#destinations.getDestinationById(item)
+      , allDestinations: this.#destinations
+      , onFormSubmit: () => {
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+      , onCloseFormClick: () => {
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    });
+
+    const tripPointComponent = new EventItemView(this.#tripEventData(item)
+      , {onEditClick: () => {
+        replaceCardToForm();
+        document.addEventListener('keydown', escKeyDownHandler);
+      }
+      });
+
+    function replaceCardToForm() {
+      replace(tripPointEditComponent, tripPointComponent);
+    }
+
+    function replaceFormToCard() {
+      replace(tripPointComponent, tripPointEditComponent);
+    }
+
+    render (tripPointComponent, this.#listComponent.element);
+  }
+
+  /** Создание списка событий путешествия */
+  #renderAllTripEvents() {
+
+    this.#listPoints.forEach((item) => {
+
+      this.#rederTripEvent(item);
+
+    });
+  }
+
+  #renderList() {
+    /** Отрисовка шапки сайта */
+    render(new SectionTripInfoView({allDestinations: this.#destinations, allPoints: this.#listPoints}), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
+    render(new NewEventButtonView(), tripMain); // Заголовок, кнопка добавить событие
+    render (new TripFiltersFormView(), tripControlsFilters); // Кнопки сортировки
+
+
+    /** Рендерим список для новых событий */
+    render(this.#listComponent, this.#listContainer);
+
+    /** Если список событий пуст, то отрисовываем сообщение */
+    if (this.#listPoints.length === 0) {
+      render(new TripEventsMessage, this.#listContainer);
+
+    }
+    /** Рендерим кнопки сортировки */
+    render(new SortButtonView(), this.#listContainer);
+
+    /** Рендерим редактируемое событие */
+    this.#rederTripEvent(this.#listPoints[0]);
+
+    /** Рендерим список событий */
+    this.#renderAllTripEvents();
+
+
+    // Переделать логику отрисовки новой точки!
+    // render(new AddNewPointView({pointsTrip: this.#listPoints, offers: this.#offers}), this.#listContainer);
+  }
+
 }

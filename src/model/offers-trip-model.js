@@ -1,18 +1,15 @@
 import {offers} from '../mock/offers.js';
 export default class OffersTripsModel {
-  constructor(data) {
-    this.data = data;
+  #offers;
+  constructor() {
+    this.#offers = offers;
   }
 
-  init() {
-    this.data = offers;
-  }
-
-  get() {
-    return this.data;
+  get offers() {
+    return this.#offers;
   }
 
   getOffersByType(points) {
-    return this.data.find((offer) => offer.type === points.type);
+    return this.#offers.find((offer) => offer.type === points.type);
   }
 }
