@@ -29,8 +29,6 @@ export default class ListPresenter {
   init() {
     this.#listPoints = [...this.#pointsTrip];
 
-    /** Переделать логику отрисовки редактируемого события */
-    this.#rederTripEvent(this.#listPoints[0]);
 
     /** Отрисовка всех компонентов */
     this.#renderList();
@@ -119,6 +117,9 @@ export default class ListPresenter {
     }
     /** Рендерим кнопки сортировки */
     render(new SortButtonView(), this.#listContainer);
+
+    /** Рендерим редактируемое событие */
+    this.#rederTripEvent(this.#listPoints[0]);
 
     /** Рендерим список событий */
     this.#renderAllTripEvents();
