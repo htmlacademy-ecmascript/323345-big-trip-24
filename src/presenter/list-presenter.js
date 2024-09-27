@@ -1,10 +1,11 @@
 import { render, RenderPosition, replace } from '../framework/render.js';
+import { MESSAGE } from '../const.js';
 
 import SectionTripInfoView from '../view/section-trip-info-view.js';
 import NewEventButtonView from '../view/new-event-button-view.js';
 import TripFiltersFormView from '../view/trip-filters-form-view.js';
 
-import SortButtonView from '../view/sort-view.js';
+import SortButtonView from '../view/sort-button-view.js';
 import TripEventListView from '../view/trip-events-list-view.js';
 import EventItemView from '../view/event-item-view.js';
 // import AddNewPointView from '../view/add-new-point-view.js';
@@ -16,10 +17,10 @@ const tripControlsFilters = document.querySelector('.trip-controls__filters');
 
 export default class ListPresenter {
 
-  #listContainer;
-  #pointsTrip;
-  #destinations;
-  #offers;
+  #listContainer = null;
+  #pointsTrip = null;
+  #destinations = null;
+  #offers = null;
 
   #listComponent = new TripEventListView();
 
@@ -28,7 +29,7 @@ export default class ListPresenter {
 
   constructor({ listContainer, pointsTripModel, destinationsTripModel, offersTripModel }) {
     this.#listContainer = listContainer;
-    this.#pointsTrip = pointsTripModel.get();
+    this.#pointsTrip = pointsTripModel.points;
     this.#destinations = destinationsTripModel;
     this.#offers = offersTripModel;
   }
@@ -114,27 +115,27 @@ export default class ListPresenter {
 
   #renderList() {
     /** Отрисовка шапки сайта */
-    render(new SectionTripInfoView({allDestinations: this.#destinations, allPoints: this.#listPoints}), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
+    render(new SectionTripInfoView({allDestinations: this.#destinations , allPoints: this.#listPoints}), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
     render(new NewEventButtonView(), tripMain); // Заголовок, кнопка добавить событие
     render (new TripFiltersFormView(), tripControlsFilters); // Кнопки сортировки
 
+    /** Рендерим кнопки сортировки */
+    render(new SortButtonView(), this.#listContainer);
 
     /** Рендерим список для новых событий */
     render(this.#listComponent, this.#listContainer);
 
     /** Если список событий пуст, то отрисовываем сообщение */
-    if (this.#listPoints.length === 0) {
-      render(new TripEventsMessage, this.#listContainer);
+    render(new TripEventsMessage(MESSAGE.EMPTY), this.#listContainer);
 
+    if (this.#listPoints.length !== 0) {
+
+      /** Рендерим редактируемое событие */
+      this.#rederTripEvent(this.#listPoints[0]);
+
+      /** Рендерим список событий */
+      this.#renderAllTripEvents();
     }
-    /** Рендерим кнопки сортировки */
-    render(new SortButtonView(), this.#listContainer);
-
-    /** Рендерим редактируемое событие */
-    this.#rederTripEvent(this.#listPoints[0]);
-
-    /** Рендерим список событий */
-    this.#renderAllTripEvents();
 
 
     // Переделать логику отрисовки новой точки!

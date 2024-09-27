@@ -67,8 +67,8 @@ function createEventItemTemplate(tripEventData) {
 
 export default class EventItemView extends AbstractView {
 
-  #tripEventData;
-  #handleEditClick;
+  #tripEventData = null;
+  #handleEditClick = null;
 
   constructor(tripEventData, {onEditClick}) {
     super();
