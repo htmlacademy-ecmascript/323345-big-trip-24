@@ -22,12 +22,12 @@ function createSectionTripInfoTemplate(allDestinations, allPoints) {
   /** Без учета выбранных предложений */
   function getTotalBasePrice() {
 
-    let totalBasePrice = 0;
+    let allBasePrice = 0;
     if (allPoints.length !== 0) {
-      totalBasePrice = allPoints.reduce((acc, point) => acc + point.base_price, 0);
-      return totalBasePrice;
+      allBasePrice = allPoints.reduce((acc, point) => acc + point.base_price, 0);
+      return allBasePrice;
     }
-    return totalBasePrice;
+    return allBasePrice;
   }
 
   const totalBasePrice = getTotalBasePrice();
