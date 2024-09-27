@@ -10,6 +10,7 @@ function getRandomArrayElement(items) {
 }
 
 const FORMATS = {
+  'headerDate': 'DD MMM',
   'date': 'MMM D',
   'time': 'HH:mm',
   'datetime': 'YYYY-MM-DD',

@@ -5,7 +5,7 @@ export default class OffersTripsModel {
     this.#offers = offers;
   }
 
-  get() {
+  get offers() {
     return this.#offers;
   }
 

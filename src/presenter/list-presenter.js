@@ -1,4 +1,8 @@
-import { render, replace } from '../framework/render.js';
+import { render, RenderPosition, replace } from '../framework/render.js';
+
+import SectionTripInfoView from '../view/section-trip-info-view.js';
+import NewEventButtonView from '../view/new-event-button-view.js';
+import TripFiltersFormView from '../view/trip-filters-form-view.js';
 
 import SortButtonView from '../view/sort-view.js';
 import TripEventListView from '../view/trip-events-list-view.js';
@@ -6,6 +10,9 @@ import EventItemView from '../view/event-item-view.js';
 // import AddNewPointView from '../view/add-new-point-view.js';
 import EditPointView from '../view/edit-poit-view.js';
 import TripEventsMessage from '../view/trip-events-message-view.js';
+
+const tripMain = document.querySelector('.trip-main');
+const tripControlsFilters = document.querySelector('.trip-controls__filters');
 
 export default class ListPresenter {
 
@@ -28,7 +35,6 @@ export default class ListPresenter {
 
   init() {
     this.#listPoints = [...this.#pointsTrip];
-
 
     /** Отрисовка всех компонентов */
     this.#renderList();
@@ -84,7 +90,7 @@ export default class ListPresenter {
         document.addEventListener('keydown', escKeyDownHandler);
       }
       });
-    // console.log(tripPointComponent);
+
     function replaceCardToForm() {
       replace(tripPointEditComponent, tripPointComponent);
     }
@@ -107,6 +113,12 @@ export default class ListPresenter {
   }
 
   #renderList() {
+    /** Отрисовка шапки сайта */
+    render(new SectionTripInfoView({allDestinations: this.#destinations, allPoints: this.#listPoints}), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
+    render(new NewEventButtonView(), tripMain); // Заголовок, кнопка добавить событие
+    render (new TripFiltersFormView(), tripControlsFilters); // Кнопки сортировки
+
+
     /** Рендерим список для новых событий */
     render(this.#listComponent, this.#listContainer);
 
@@ -123,6 +135,7 @@ export default class ListPresenter {
 
     /** Рендерим список событий */
     this.#renderAllTripEvents();
+
 
     // Переделать логику отрисовки новой точки!
     // render(new AddNewPointView({pointsTrip: this.#listPoints, offers: this.#offers}), this.#listContainer);
