@@ -15,14 +15,14 @@ const MESSAGE = {
   FAILED_LOAD: 'Failed to load latest route information',
 };
 
-const FiltersPoints = {
+const FilterType = {
   EVERYTHING: 'everything',
   FUTURE: 'future',
   PRESENT: 'present',
   PAST: 'past'
 };
 
-const SortPoints = {
+const SortType = {
   DAY: 'day',
   EVENT: 'event',
   TIME: 'time',
@@ -30,4 +30,6 @@ const SortPoints = {
   OFFERS: 'offers',
 };
 
-export {EVENT_TYPES, MESSAGE};
+const DisabledSortType = [SortType.EVENT, SortType.OFFERS];
+
+export {EVENT_TYPES, MESSAGE, FilterType, SortType, DisabledSortType};

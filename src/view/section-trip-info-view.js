@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanizeEventDate } from '../utils.js';
+import { humanizeEventDate } from '../utils/utils.js';
 
 
 function createSectionTripInfoTemplate(allDestinations, allPoints) {

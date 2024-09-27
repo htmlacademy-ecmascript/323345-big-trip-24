@@ -1,5 +1,5 @@
 import {EVENT_TYPES} from '../const.js';
-import { humanizeEventDate, capitalizeFirstLetter } from '../utils.js';
+import { humanizeEventDate, capitalizeFirstLetter } from '../utils/utils.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(tripEventData) {

@@ -1,4 +1,4 @@
-import {humanizeEventDate, getDuration} from '../utils.js';
+import {humanizeEventDate, getDuration} from '../utils/utils.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(offers) {
