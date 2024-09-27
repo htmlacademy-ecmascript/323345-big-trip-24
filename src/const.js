@@ -15,5 +15,19 @@ const MESSAGE = {
   FAILED_LOAD: 'Failed to load latest route information',
 };
 
+const FiltersPoints = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past'
+};
+
+const SortPoints = {
+  DAY: 'day',
+  EVENT: 'event',
+  TIME: 'time',
+  PRICE: 'price',
+  OFFERS: 'offers',
+};
 
 export {EVENT_TYPES, MESSAGE};

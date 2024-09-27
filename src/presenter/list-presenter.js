@@ -125,10 +125,12 @@ export default class ListPresenter {
     /** Рендерим список для новых событий */
     render(this.#listComponent, this.#listContainer);
 
-    /** Если список событий пуст, то отрисовываем сообщение */
-    render(new TripEventsMessage(MESSAGE.EMPTY), this.#listContainer);
+    if (this.#listPoints.length === 0) {
+      /** Если список событий пуст, то отрисовываем сообщение */
+      render(new TripEventsMessage(MESSAGE.EMPTY), this.#listContainer);
 
-    if (this.#listPoints.length !== 0) {
+    } else {
+      /** Если список событий не пуст, то отрисовываем события */
 
       /** Рендерим редактируемое событие */
       this.#rederTripEvent(this.#listPoints[0]);
