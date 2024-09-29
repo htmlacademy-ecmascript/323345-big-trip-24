@@ -1,13 +1,11 @@
 import { render } from '../framework/render.js';
-import { MESSAGE } from '../const.js';
-import { SortType } from '../const.js';
+import { MESSAGE, SortType } from '../const.js';
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/filter.js';
 import { generateFilter } from '../mock/filter.js';
 
 import SortButtonView from '../view/sort-button-view.js';
 import TripFiltersFormView from '../view/trip-filters-form-view.js';
 import TripEventListView from '../view/trip-events-list-view.js';
-// import AddNewPointView from '../view/add-new-point-view.js';
 import TripEventsMessage from '../view/trip-events-message-view.js';
 
 import HeaderPresenter from './header-presenter.js';
@@ -24,13 +22,21 @@ export default class ListPresenter {
   #offers = null;
 
   #listComponent = new TripEventListView();
+  #noTripEventsComponent = new TripEventsMessage(MESSAGE.EMPTY);
+  #loadingTripEventsComponent = new TripEventsMessage(MESSAGE.LOADING);
+  #failedLoadingTripEventsComponent = new TripEventsMessage(MESSAGE.FAILED_LOAD);
 
   #listPoints = [];
   #sourcedTripPoints = [];
   #sortComponent = null;
   #currentSortType = SortType.DAY;
 
-  constructor({ listContainer, pointsTripModel, destinationsTripModel, offersTripModel }) {
+  constructor({
+    listContainer
+    , pointsTripModel
+    , destinationsTripModel
+    , offersTripModel
+  }) {
     this.#listContainer = listContainer;
     this.#pointsTrip = pointsTripModel.points;
     this.#destinations = destinationsTripModel;
@@ -45,10 +51,10 @@ export default class ListPresenter {
 
     this.#headerPresenter({destinations:this.#destinations, pointsTrip: this.#pointsTrip});
 
-    this.#renderAllTripEvents();
-
     /** Рендерим кнопки сортировки */
     this.#renderSort();
+
+    this.#renderAllTripEvents();
 
     /** Рендерим форму фильтрации */
     this.#renderFilters();
@@ -60,23 +66,15 @@ export default class ListPresenter {
 
   #renderList() {
 
-    /** Рендерим список для новых событий */
-    render(this.#listComponent, this.#listContainer);
-
     if (this.#listPoints.length === 0) {
       /** Если список событий пуст, то отрисовываем сообщение */
-      render(new TripEventsMessage(MESSAGE.EMPTY), this.#listContainer);
+      render(this.#noTripEventsComponent, this.#listContainer);
 
     } else {
       /** Если список событий не пуст, то отрисовываем события */
-
       /** Рендерим список событий */
       this.#renderAllTripEvents();
     }
-
-
-    // Переделать логику отрисовки новой точки!
-    // render(new AddNewPointView({pointsTrip: this.#listPoints, offers: this.#offers}), this.#listContainer);
   }
 
   #headerPresenter({destinations, pointsTrip}) {
@@ -126,13 +124,18 @@ export default class ListPresenter {
     return tripEventData;
   }
 
-
   /** Создание списка событий путешествия */
   #renderAllTripEvents() {
 
     this.#listPoints.forEach((item) =>
 
-      this.#tripPointsPresenter({destinations:this.#destinations, pointsTrip: this.#pointsTrip, tripEventData: this.#tripEventData(item), item: item, listContainer: this.#listContainer})
+      this.#tripPointsPresenter({
+        destinations:this.#destinations
+        , pointsTrip: this.#pointsTrip
+        , tripEventData: this.#tripEventData(item)
+        , item: item
+        , listContainer: this.#listContainer
+      })
     );
   }
 

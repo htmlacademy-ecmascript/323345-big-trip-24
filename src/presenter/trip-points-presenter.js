@@ -14,8 +14,16 @@ export default class TripPointsPresenter {
   #item = null;
   #listContainer = null;
   #listPoints = [];
+  #tripPointComponent = null;
+  #tripPointEditComponent = null;
 
-  constructor({destinations, pointsTrip, tripEventData, item, listContainer}) {
+  constructor({
+    destinations
+    , pointsTrip
+    , tripEventData
+    , item
+    , listContainer
+  }) {
     this.#destinations = destinations;
     this.#pointsTrip = pointsTrip;
     this.#tripEventData = tripEventData;
@@ -25,51 +33,48 @@ export default class TripPointsPresenter {
 
   init() {
 
+    /** Рендерим список для новых событий */
     render(this.#listComponent, this.#listContainer);
 
-    this.#rederTripEvent(this.#item);
+    this.#tripPointComponent = new EventItemView(this.#tripEventData, {onEditClick: this.#replaceCardToForm});
 
+    this.#tripPointEditComponent = new EditPointView({
+      tripEventData: this.#tripEventData
+      , destinations: this.#destinations.getDestinationById(this.#item)
+      , allDestinations: this.#destinations
+      , onFormSubmit: this.#replaceFormToCard
+      , onCloseFormClick: this.#replaceFormToCard
+    });
+
+    this.#rederTripEvent(this.#item);
   }
 
   /** Создание события путешествия */
-  #rederTripEvent(item) {
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
+  #rederTripEvent() {
 
-    const tripPointEditComponent = new EditPointView({
-      tripEventData: this.#tripEventData
-      , destinations: this.#destinations.getDestinationById(item)
-      , allDestinations: this.#destinations
-      , onFormSubmit: () => {
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-      , onCloseFormClick: () => {
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    });
+    render (this.#tripPointComponent, this.#listComponent.element);
+  }
 
-    const tripPointComponent = new EventItemView(this.#tripEventData
-      , {onEditClick: () => {
-        replaceCardToForm();
-        document.addEventListener('keydown', escKeyDownHandler);
-      }
-      });
 
-    function replaceCardToForm() {
-      replace(tripPointEditComponent, tripPointComponent);
+  #escKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.#replaceFormToCard();
+      document.removeEventListener('keydown', this.#escKeyDownHandler);
     }
+  };
 
-    function replaceFormToCard() {
-      replace(tripPointComponent, tripPointEditComponent);
-    }
+  #replaceCardToForm() {
 
-    render (tripPointComponent, this.#listComponent.element);
+    replace(this.#tripPointEditComponent, this.#tripPointComponent);
+
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+  }
+
+  #replaceFormToCard() {
+
+    replace(this.#tripPointComponent, this.#tripPointEditComponent);
+
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 }

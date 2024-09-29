@@ -90,7 +90,14 @@ function destinationsList({destinations}) {
 
 function createEditPointTemplate(tripEventData, destinations, allDestinations) {
 
-  const {basePrice = tripEventData.basePrice, dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, type = tripEventData.type, destinationPicture = tripEventData.destinationPicture} = tripEventData;
+  const {
+    basePrice = tripEventData.basePrice
+    , dateFrom = tripEventData.dateFrom
+    , dateTo = tripEventData.dateTo
+    , destination = tripEventData.destination
+    , type = tripEventData.type
+    , destinationPicture = tripEventData.destinationPicture
+  } = tripEventData;
   const timeStart = humanizeEventDate(dateFrom, 'eventTime');
   const timeEnd = humanizeEventDate(dateTo, 'eventTime');
 
@@ -112,7 +119,7 @@ function createEditPointTemplate(tripEventData, destinations, allDestinations) {
             <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
 
               ${destinationsList(allDestinations)}
 
