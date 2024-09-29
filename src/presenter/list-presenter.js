@@ -1,19 +1,20 @@
-import { render, RenderPosition, replace } from '../framework/render.js';
+import { render, replace } from '../framework/render.js';
 import { MESSAGE } from '../const.js';
 import { SortType } from '../const.js';
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/filter.js';
-
-import SectionTripInfoView from '../view/section-trip-info-view.js';
-import NewEventButtonView from '../view/new-event-button-view.js';
+import { generateFilter } from '../mock/filter.js';
 
 import SortButtonView from '../view/sort-button-view.js';
+import TripFiltersFormView from '../view/trip-filters-form-view.js';
 import TripEventListView from '../view/trip-events-list-view.js';
 import EventItemView from '../view/event-item-view.js';
 // import AddNewPointView from '../view/add-new-point-view.js';
 import EditPointView from '../view/edit-poit-view.js';
 import TripEventsMessage from '../view/trip-events-message-view.js';
 
-const tripMain = document.querySelector('.trip-main');
+import HeaderPresenter from './header-presenter.js';
+
+const tripFiltersElement = document.querySelector('.trip-controls__filters');
 
 
 export default class ListPresenter {
@@ -42,8 +43,57 @@ export default class ListPresenter {
 
     this.#sourcedTripPoints = [...this.#pointsTrip];
 
-    /** Отрисовка всех компонентов */
+
+    this.#headerPresenter({destinations:this.#destinations, pointsTrip: this.#pointsTrip});
+
+    /** Рендерим кнопки сортировки */
+    this.#renderSort();
+
+    /** Рендерим форму фильтрации */
+    this.#renderFilters();
+
+    /** Отрисовка всех компонентов путешествия */
     this.#renderList();
+
+  }
+
+  #renderList() {
+
+    /** Рендерим список для новых событий */
+    render(this.#listComponent, this.#listContainer);
+
+    if (this.#listPoints.length === 0) {
+      /** Если список событий пуст, то отрисовываем сообщение */
+      render(new TripEventsMessage(MESSAGE.EMPTY), this.#listContainer);
+
+    } else {
+      /** Если список событий не пуст, то отрисовываем события */
+
+      /** Рендерим редактируемое событие */
+      this.#rederTripEvent(this.#listPoints[0]);
+
+      /** Рендерим список событий */
+      this.#renderAllTripEvents();
+    }
+
+
+    // Переделать логику отрисовки новой точки!
+    // render(new AddNewPointView({pointsTrip: this.#listPoints, offers: this.#offers}), this.#listContainer);
+  }
+
+  #headerPresenter({destinations, pointsTrip}) {
+    const headerPresenter = new HeaderPresenter({
+      destinations,
+      pointsTrip,
+    });
+
+    return headerPresenter.init();
+  }
+
+  #renderFilters() {
+    const filters = generateFilter();
+
+    render(new TripFiltersFormView({filters}), tripFiltersElement);
   }
 
   /** Елемент события путешествия */
@@ -116,36 +166,6 @@ export default class ListPresenter {
       this.#rederTripEvent(item);
 
     });
-  }
-
-  #renderList() {
-    /** Отрисовка шапки сайта */
-    render(new SectionTripInfoView({allDestinations: this.#destinations , allPoints: this.#listPoints}), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
-    render(new NewEventButtonView(), tripMain); // Заголовок, кнопка добавить событие
-
-    /** Рендерим кнопки сортировки */
-    this.#renderSort();
-
-    /** Рендерим список для новых событий */
-    render(this.#listComponent, this.#listContainer);
-
-    if (this.#listPoints.length === 0) {
-      /** Если список событий пуст, то отрисовываем сообщение */
-      render(new TripEventsMessage(MESSAGE.EMPTY), this.#listContainer);
-
-    } else {
-      /** Если список событий не пуст, то отрисовываем события */
-
-      /** Рендерим редактируемое событие */
-      this.#rederTripEvent(this.#listPoints[0]);
-
-      /** Рендерим список событий */
-      this.#renderAllTripEvents();
-    }
-
-
-    // Переделать логику отрисовки новой точки!
-    // render(new AddNewPointView({pointsTrip: this.#listPoints, offers: this.#offers}), this.#listContainer);
   }
 
   /** Отрисовка cортировки событий путешествия */
