@@ -7,6 +7,7 @@ export default class DestinationsTripModel {
   }
 
   getDestinationById(points) {
+
     return this.#destinations.find((dest) => dest.id === points.destination);
   }
 

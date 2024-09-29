@@ -1,4 +1,4 @@
-import { render, replace } from '../framework/render.js';
+import { render } from '../framework/render.js';
 import { MESSAGE } from '../const.js';
 import { SortType } from '../const.js';
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/filter.js';
@@ -7,12 +7,11 @@ import { generateFilter } from '../mock/filter.js';
 import SortButtonView from '../view/sort-button-view.js';
 import TripFiltersFormView from '../view/trip-filters-form-view.js';
 import TripEventListView from '../view/trip-events-list-view.js';
-import EventItemView from '../view/event-item-view.js';
 // import AddNewPointView from '../view/add-new-point-view.js';
-import EditPointView from '../view/edit-poit-view.js';
 import TripEventsMessage from '../view/trip-events-message-view.js';
 
 import HeaderPresenter from './header-presenter.js';
+import TripPointsPresenter from './trip-points-presenter.js';
 
 const tripFiltersElement = document.querySelector('.trip-controls__filters');
 
@@ -46,6 +45,8 @@ export default class ListPresenter {
 
     this.#headerPresenter({destinations:this.#destinations, pointsTrip: this.#pointsTrip});
 
+    this.#renderAllTripEvents();
+
     /** Рендерим кнопки сортировки */
     this.#renderSort();
 
@@ -69,9 +70,6 @@ export default class ListPresenter {
     } else {
       /** Если список событий не пуст, то отрисовываем события */
 
-      /** Рендерим редактируемое событие */
-      this.#rederTripEvent(this.#listPoints[0]);
-
       /** Рендерим список событий */
       this.#renderAllTripEvents();
     }
@@ -90,6 +88,19 @@ export default class ListPresenter {
     return headerPresenter.init();
   }
 
+  /** Создание события путешествия - презентер */
+  #tripPointsPresenter({destinations, pointsTrip, tripEventData, item, listContainer}) {
+    const tripPointsPresenter = new TripPointsPresenter({
+      destinations,
+      pointsTrip,
+      tripEventData,
+      item,
+      listContainer,
+    });
+
+    return tripPointsPresenter.init();
+  }
+
   #renderFilters() {
     const filters = generateFilter();
 
@@ -98,7 +109,6 @@ export default class ListPresenter {
 
   /** Елемент события путешествия */
   #tripEventData(item) {
-
     const destination = this.#destinations.getDestinationById(item);
     const tripOffers = this.#offers.getOffersByType(item);
 
@@ -106,7 +116,7 @@ export default class ListPresenter {
       basePrice: item.base_price,
       dateFrom: new Date(item.date_from),
       dateTo: new Date(item.date_to),
-      destination: destination.name,
+      destination: destination,
       isFavorite: item.is_favorite,
       offers: tripOffers.offers.map((offer) => ({title: offer.title, price: offer.price, id: offer.id})),
       type: item.type,
@@ -116,56 +126,14 @@ export default class ListPresenter {
     return tripEventData;
   }
 
-  /** Создание события путешествия */
-  #rederTripEvent(item) {
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
-
-    const tripPointEditComponent = new EditPointView({
-      tripEventData: this.#tripEventData(item)
-      , destinations: this.#destinations.getDestinationById(item)
-      , allDestinations: this.#destinations
-      , onFormSubmit: () => {
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-      , onCloseFormClick: () => {
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    });
-
-    const tripPointComponent = new EventItemView(this.#tripEventData(item)
-      , {onEditClick: () => {
-        replaceCardToForm();
-        document.addEventListener('keydown', escKeyDownHandler);
-      }
-      });
-
-    function replaceCardToForm() {
-      replace(tripPointEditComponent, tripPointComponent);
-    }
-
-    function replaceFormToCard() {
-      replace(tripPointComponent, tripPointEditComponent);
-    }
-
-    render (tripPointComponent, this.#listComponent.element);
-  }
 
   /** Создание списка событий путешествия */
   #renderAllTripEvents() {
 
-    this.#listPoints.forEach((item) => {
+    this.#listPoints.forEach((item) =>
 
-      this.#rederTripEvent(item);
-
-    });
+      this.#tripPointsPresenter({destinations:this.#destinations, pointsTrip: this.#pointsTrip, tripEventData: this.#tripEventData(item), item: item, listContainer: this.#listContainer})
+    );
   }
 
   /** Отрисовка cортировки событий путешествия */
