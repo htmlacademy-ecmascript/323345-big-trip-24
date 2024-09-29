@@ -1,5 +1,4 @@
 import ListPresenter from './presenter/list-presenter.js';
-
 import PointsTripModel from './model/points-trip-model.js';
 import OffersTripsModel from './model/offers-trip-model.js';
 import DestinationsTripModel from './model/destinations-trip-model.js';

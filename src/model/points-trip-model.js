@@ -6,7 +6,7 @@ export default class PointsTripModel {
     this.#points = points;
   }
 
-  get() {
+  get points() {
     return this.#points;
   }
 }

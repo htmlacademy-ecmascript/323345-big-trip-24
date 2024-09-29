@@ -1,5 +1,5 @@
 import {EVENT_TYPES} from '../const.js';
-import { humanizeEventDate, capitalizeFirstLetter } from '../utils.js';
+import { humanizeEventDate, capitalizeFirstLetter } from '../utils/utils.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(tripEventData) {
@@ -154,12 +154,12 @@ function createEditPointTemplate(tripEventData, destinations, allDestinations) {
 
 export default class EditPointView extends AbstractView {
 
-  #tripEventData;
-  #destinations;
-  #allDestinations;
+  #tripEventData = null;
+  #destinations = null;
+  #allDestinations = null;
 
-  #handleFormSubmit;
-  #handleCloseFormClick;
+  #handleFormSubmit = null;
+  #handleCloseFormClick = null;
 
   constructor({tripEventData, destinations, allDestinations, onFormSubmit, onCloseFormClick}) {
     super();

@@ -1,14 +1,5 @@
 import dayjs from 'dayjs';
 
-/**
- * Returns a random element from the given array.
- * @param {Array} items - Array of any type of elements.
- * @returns {any} - Random element from the array.
- */
-function getRandomArrayElement(items) {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
 const FORMATS = {
   'headerDate': 'DD MMM',
   'date': 'MMM D',
@@ -62,4 +53,4 @@ function capitalizeFirstLetter(word) {
   return word[0].toUpperCase() + word.slice(1);
 }
 
-export { getRandomArrayElement, humanizeEventDate, getDuration, capitalizeFirstLetter };
+export { humanizeEventDate, getDuration, capitalizeFirstLetter };

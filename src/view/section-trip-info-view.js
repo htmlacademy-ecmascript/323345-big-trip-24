@@ -1,22 +1,44 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanizeEventDate } from '../utils.js';
+import { humanizeEventDate } from '../utils/utils.js';
 
 
 function createSectionTripInfoTemplate(allDestinations, allPoints) {
-  const eventDateStart = allPoints[0].date_from;
-  const eventDateEnd = allPoints[allPoints.length - 1].date_to;
-  const allDestinationsStr = allDestinations.map((destination) => (destination.name)).join(' — ');
+  function getDateAllPoints() {
+
+    let eventDateStart = '';
+    let eventDateEnd = '';
+    let allDestinationsStr = '';
+    if (allPoints.length !== 0) {
+      eventDateStart = allPoints[0].date_from;
+      eventDateEnd = allPoints[allPoints.length - 1].date_to;
+      allDestinationsStr = allDestinations.map((destination) => (destination.name)).join(' — ');
+      return {eventDateStart, eventDateEnd, allDestinationsStr};
+    }
+
+    return {eventDateStart, eventDateEnd, allDestinationsStr};
+  }
+  const date = getDateAllPoints();
 
   /** Без учета выбранных предложений */
-  const totalBasePrice = allPoints.reduce((acc, point) => acc + point.base_price, 0);
+  function getTotalBasePrice() {
+
+    let allBasePrice = 0;
+    if (allPoints.length !== 0) {
+      allBasePrice = allPoints.reduce((acc, point) => acc + point.base_price, 0);
+      return allBasePrice;
+    }
+    return allBasePrice;
+  }
+
+  const totalBasePrice = getTotalBasePrice();
 
 
   return (
     `<section class="trip-main__trip-info  trip-info">
             <div class="trip-info__main">
-              <h1 class="trip-info__title">${allDestinationsStr}</h1>
+              <h1 class="trip-info__title">${date.allDestinationsStr}</h1>
 
-              <p class="trip-info__dates">${humanizeEventDate(eventDateStart, 'headerDate')} — ${humanizeEventDate(eventDateEnd, 'headerDate')}</p>
+              <p class="trip-info__dates">${humanizeEventDate(date.eventDateStart, 'headerDate')} — ${humanizeEventDate(date.eventDateEnd, 'headerDate')}</p>
             </div>
 
             <p class="trip-info__cost">
@@ -28,8 +50,8 @@ function createSectionTripInfoTemplate(allDestinations, allPoints) {
 
 export default class SectionTripInfoView extends AbstractView {
 
-  #allDestinations;
-  #allPoints;
+  #allDestinations = null;
+  #allPoints = null;
 
   constructor({allDestinations, allPoints}) {
 

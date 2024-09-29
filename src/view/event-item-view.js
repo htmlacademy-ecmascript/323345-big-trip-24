@@ -1,4 +1,4 @@
-import {humanizeEventDate, getDuration} from '../utils.js';
+import {humanizeEventDate, getDuration} from '../utils/utils.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(offers) {
@@ -67,8 +67,8 @@ function createEventItemTemplate(tripEventData) {
 
 export default class EventItemView extends AbstractView {
 
-  #tripEventData;
-  #handleEditClick;
+  #tripEventData = null;
+  #handleEditClick = null;
 
   constructor(tripEventData, {onEditClick}) {
     super();
