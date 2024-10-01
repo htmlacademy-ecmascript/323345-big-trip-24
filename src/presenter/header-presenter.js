@@ -12,13 +12,13 @@ export default class HeaderPresenter {
   #destinations = null;
   #listPoints = [];
 
-  constructor({destinations, pointsTrip}) {
-    this.#pointsTrip = pointsTrip;
+  constructor({destinations, listPoints}) {
+    this.#listPoints = listPoints;
     this.#destinations = destinations;
   }
 
   init() {
-    this.#listPoints = [...this.#pointsTrip];
+    this.#listPoints = [...this.#listPoints];
 
     this.#renderTripHeader();
 

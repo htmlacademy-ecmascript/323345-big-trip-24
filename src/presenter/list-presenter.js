@@ -2,6 +2,7 @@ import { render } from '../framework/render.js';
 import { MESSAGE, SortType } from '../const.js';
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/filter.js';
 import { generateFilter } from '../mock/filter.js';
+import { updateItem } from '../utils/utils.js';
 
 import SortButtonView from '../view/sort-button-view.js';
 import TripFiltersFormView from '../view/trip-filters-form-view.js';
@@ -23,13 +24,14 @@ export default class ListPresenter {
 
   #listComponent = new TripEventListView();
   #noTripEventsComponent = new TripEventsMessage(MESSAGE.EMPTY);
-  #loadingTripEventsComponent = new TripEventsMessage(MESSAGE.LOADING);
-  #failedLoadingTripEventsComponent = new TripEventsMessage(MESSAGE.FAILED_LOAD);
+
+  #tripPointsPresentersId = new Map();
 
   #listPoints = [];
   #sourcedTripPoints = [];
   #sortComponent = null;
   #currentSortType = SortType.DAY;
+
 
   constructor({
     listContainer
@@ -48,13 +50,10 @@ export default class ListPresenter {
 
     this.#sourcedTripPoints = [...this.#pointsTrip];
 
-
-    this.#headerPresenter({destinations:this.#destinations, pointsTrip: this.#pointsTrip});
+    this.#headerPresenter({destinations:this.#destinations, listPoints: this.#listPoints});
 
     /** Рендерим кнопки сортировки */
     this.#renderSort();
-
-    this.#renderAllTripEvents();
 
     /** Рендерим форму фильтрации */
     this.#renderFilters();
@@ -72,71 +71,41 @@ export default class ListPresenter {
 
     } else {
       /** Если список событий не пуст, то отрисовываем события */
+
       /** Рендерим список событий */
       this.#renderAllTripEvents();
     }
   }
 
-  #headerPresenter({destinations, pointsTrip}) {
+  #headerPresenter({destinations, listPoints}) {
     const headerPresenter = new HeaderPresenter({
       destinations,
-      pointsTrip,
+      listPoints,
     });
 
     return headerPresenter.init();
   }
 
-  /** Создание события путешествия - презентер */
-  #tripPointsPresenter({destinations, pointsTrip, tripEventData, item, listContainer}) {
-    const tripPointsPresenter = new TripPointsPresenter({
-      destinations,
-      pointsTrip,
-      tripEventData,
-      item,
-      listContainer,
-    });
-
-    return tripPointsPresenter.init();
-  }
-
-  #renderFilters() {
-    const filters = generateFilter();
-
-    render(new TripFiltersFormView({filters}), tripFiltersElement);
-  }
-
   /** Елемент события путешествия */
   #tripEventData(item) {
     const destination = this.#destinations.getDestinationById(item);
-    const tripOffers = this.#offers.getOffersByType(item);
+    const tripOffers = this.#offers.getSelectedOffersByType(item.type, item.offers);
+    const tripAllOffers = this.#offers.getOffersByType(item.type);
 
     const tripEventData = ({
+      id: item.id,
       basePrice: item.base_price,
-      dateFrom: new Date(item.date_from),
-      dateTo: new Date(item.date_to),
+      dateFrom: item.date_from,
+      dateTo: item.date_to,
       destination: destination,
       isFavorite: item.is_favorite,
-      offers: tripOffers.offers.map((offer) => ({title: offer.title, price: offer.price, id: offer.id})),
+      offers: tripOffers,
+      allOffers: tripAllOffers,
       type: item.type,
-      destinationPicture: tripOffers.type,
+      destinationPicture: item.type,
     });
 
     return tripEventData;
-  }
-
-  /** Создание списка событий путешествия */
-  #renderAllTripEvents() {
-
-    this.#listPoints.forEach((item) =>
-
-      this.#tripPointsPresenter({
-        destinations:this.#destinations
-        , pointsTrip: this.#pointsTrip
-        , tripEventData: this.#tripEventData(item)
-        , item: item
-        , listContainer: this.#listContainer
-      })
-    );
   }
 
   /** Отрисовка cортировки событий путешествия */
@@ -177,4 +146,57 @@ export default class ListPresenter {
     this.#sortTripPoints(sortType);
   };
 
+  #clearTripPointList() {
+    this.#tripPointsPresentersId.forEach((presenter) => presenter.destroy());
+    this.#tripPointsPresentersId.clear();
+  }
+
+  #renderFilters() {
+    const filters = generateFilter();
+
+    render(new TripFiltersFormView({filters}), tripFiltersElement);
+  }
+
+  /** Обновление данных путешествия */
+  #handleTripPointChange = (updatedTripEventData) => {
+
+    this.#pointsTrip = updateItem(this.#pointsTrip, updatedTripEventData);
+    this.#tripPointsPresentersId.get(updatedTripEventData.id).init(updatedTripEventData);
+
+  };
+
+  #handleModeChange = () => {
+    this.#tripPointsPresentersId.forEach((presenter) => presenter.resetView());
+  };
+
+
+  /** Создание события путешествия - презентер */
+  #renderTripPoint({destinations, tripEventData, listContainer}) {
+
+    const tripPointsPresenter = new TripPointsPresenter({
+      destinations,
+      tripEventData,
+      listContainer,
+      onEventChange: this.#handleTripPointChange,
+      onModeChange: this.#handleModeChange,
+    });
+
+    tripPointsPresenter.init(tripEventData);
+
+    this.#tripPointsPresentersId.set(tripEventData.id, tripPointsPresenter);
+  }
+
+  /** Создание списка событий путешествия */
+  #renderAllTripEvents() {
+
+    this.#listPoints.forEach((item) =>
+
+      this.#renderTripPoint({
+        destinations:this.#destinations
+        , tripEventData: this.#tripEventData(item)
+        , listContainer: this.#listContainer
+      })
+
+    );
+  }
 }

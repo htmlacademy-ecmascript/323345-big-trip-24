@@ -9,4 +9,8 @@ export default class PointsTripModel {
   get points() {
     return this.#points;
   }
+
+  set points(tripPoints) {
+    this.#points = tripPoints;
+  }
 }

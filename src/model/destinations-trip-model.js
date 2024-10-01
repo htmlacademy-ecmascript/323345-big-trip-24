@@ -14,4 +14,8 @@ export default class DestinationsTripModel {
   get destinations () {
     return this.#destinations;
   }
+
+  set destinations (destinationsPoints) {
+    this.#destinations = destinationsPoints;
+  }
 }
