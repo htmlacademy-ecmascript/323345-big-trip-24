@@ -9,7 +9,16 @@ export default class OffersTripsModel {
     return this.#offers;
   }
 
+  set offers(offersPoints) {
+    this.#offers = offersPoints;
+  }
+
   getOffersByType(points) {
-    return this.#offers.find((offer) => offer.type === points.type);
+    return this.#offers.find((offer) => offer.type === points).offers;
+  }
+
+  getSelectedOffersByType(type, offersList){
+    return this.getOffersByType(type)
+      .filter((offer) => offersList.includes(offer.id));
   }
 }

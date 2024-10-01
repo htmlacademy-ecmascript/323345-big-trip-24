@@ -3,7 +3,7 @@ import { humanizeEventDate, capitalizeFirstLetter } from '../utils/utils.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(tripEventData) {
-  // console.log(tripEventData);
+
   if (tripEventData.offers.length > 0) {
 
     const selectedOffers = tripEventData.offers;
@@ -12,7 +12,7 @@ function createOffersTemplate(tripEventData) {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
         <div class="event__available-offers">
 
-          ${tripEventData.offers.map((offer) => (`
+          ${tripEventData.allOffers.map((offer) => (`
             <div class="event__offer-selector">
               <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="${offer.title}" ${selectedOffers.includes(offer) && 'checked'}>
               <label class="event__offer-label" for="${offer.id}">
@@ -90,9 +90,16 @@ function destinationsList({destinations}) {
 
 function createEditPointTemplate(tripEventData, destinations, allDestinations) {
 
-  const {basePrice = tripEventData.basePrice, dateFrom = tripEventData.dateFrom, dateTo = tripEventData.dateTo, destination = tripEventData.destination, type = tripEventData.type, destinationPicture = tripEventData.destinationPicture} = tripEventData;
-  const timeStart = humanizeEventDate(dateFrom, 'eventTime');
-  const timeEnd = humanizeEventDate(dateTo, 'eventTime');
+  const {
+    basePrice = tripEventData.basePrice
+    , dateFrom = new Date(tripEventData.dateFrom)
+    , dateTo = new Date(tripEventData.dateTo)
+    , destination = tripEventData.destination
+    , type = tripEventData.type
+    , destinationPicture = tripEventData.destinationPicture
+  } = tripEventData;
+  const timeStart = humanizeEventDate(dateFrom, 'eventTime') ? humanizeEventDate(dateFrom, 'eventTime') : '';
+  const timeEnd = humanizeEventDate(dateTo, 'eventTime') ? humanizeEventDate(dateTo, 'eventTime') : '';
 
   return (`
     <li class="trip-events__item">
@@ -112,7 +119,7 @@ function createEditPointTemplate(tripEventData, destinations, allDestinations) {
             <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
 
               ${destinationsList(allDestinations)}
 

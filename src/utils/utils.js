@@ -53,4 +53,8 @@ function capitalizeFirstLetter(word) {
   return word[0].toUpperCase() + word.slice(1);
 }
 
-export { humanizeEventDate, getDuration, capitalizeFirstLetter };
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
+
+export { humanizeEventDate, getDuration, capitalizeFirstLetter, updateItem };
