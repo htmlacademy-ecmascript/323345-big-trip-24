@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-function createTripFiltersFormTemplate(filters) {
+function createFiltersEventsTemplate(filters) {
 
   return (`
     <div class="trip-main__trip-controls  trip-controls">
@@ -28,7 +28,7 @@ function createTripFiltersFormTemplate(filters) {
   `);
 }
 
-export default class TripFiltersFormView extends AbstractView {
+export default class FiltersEventsView extends AbstractView {
 
   #filters = null;
 
@@ -38,7 +38,7 @@ export default class TripFiltersFormView extends AbstractView {
   }
 
   get template() {
-    return createTripFiltersFormTemplate(this.#filters);
+    return createFiltersEventsTemplate(this.#filters);
   }
 }
 

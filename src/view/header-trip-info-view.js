@@ -2,7 +2,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 import { humanizeEventDate } from '../utils/utils.js';
 
 
-function createSectionTripInfoTemplate(allDestinations, allPoints) {
+function createHeaderTripInfoTemplate(allDestinations, allPoints) {
   function getDateAllPoints() {
 
     let eventDateStart = '';
@@ -48,7 +48,7 @@ function createSectionTripInfoTemplate(allDestinations, allPoints) {
   );
 }
 
-export default class SectionTripInfoView extends AbstractView {
+export default class HeaderTripInfoView extends AbstractView {
 
   #allDestinations = null;
   #allPoints = null;
@@ -61,7 +61,7 @@ export default class SectionTripInfoView extends AbstractView {
   }
 
   get template() {
-    return createSectionTripInfoTemplate(this.#allDestinations, this.#allPoints);
+    return createHeaderTripInfoTemplate(this.#allDestinations, this.#allPoints);
   }
 }
 

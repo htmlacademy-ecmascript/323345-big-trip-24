@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-function createAddNewPointTemplate() {
+function createAddNewEventTemplate() {
   return `<form class="event event--edit" action="#" method="post">
                 <header class="event__header">
                   <div class="event__type-wrapper">
@@ -163,7 +163,7 @@ function createAddNewPointTemplate() {
               </form>`;
 }
 
-export default class AddNewPointView extends AbstractView {
+export default class AddNewEventView extends AbstractView {
 
   #pointsTrip = null;
   #offers = null;
@@ -175,6 +175,6 @@ export default class AddNewPointView extends AbstractView {
   }
 
   get template() {
-    return createAddNewPointTemplate(this.#pointsTrip, this.#offers);
+    return createAddNewEventTemplate(this.#pointsTrip, this.#offers);
   }
 }

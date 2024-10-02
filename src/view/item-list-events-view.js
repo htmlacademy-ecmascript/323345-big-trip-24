@@ -18,7 +18,7 @@ function createOffersTemplate(offers) {
 }
 
 
-function createEventItemTemplate(tripEventData) {
+function createItemListEventsTemplate(tripEventData) {
 
   const {
     basePrice = tripEventData.basePrice
@@ -75,7 +75,7 @@ function createEventItemTemplate(tripEventData) {
   );
 }
 
-export default class EventItemView extends AbstractView {
+export default class ItemListEventsView extends AbstractView {
 
   #tripEventData = null;
   #handleEditClick = null;
@@ -96,7 +96,7 @@ export default class EventItemView extends AbstractView {
 
   get template() {
 
-    return createEventItemTemplate(this.#tripEventData);
+    return createItemListEventsTemplate(this.#tripEventData);
   }
 
   #editClickHandler = (evt) => {

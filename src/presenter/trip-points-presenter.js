@@ -1,8 +1,8 @@
 import { render, replace, remove } from '../framework/render.js';
 
-import TripEventListView from '../view/trip-events-list-view.js';
-import EventItemView from '../view/event-item-view.js';
-import EditPointView from '../view/edit-poit-view.js';
+import ListEventsView from '../view/list-events-view.js';
+import ItemListEventsView from '../view/item-list-events-view.js';
+import EditItemListEventsView from '../view/edit-item-list-events-view.js';
 
 
 const Mode = {
@@ -36,7 +36,7 @@ export default class TripPointsPresenter {
   }
 
   init(tripEventData) {
-    this.#listComponent = new TripEventListView();
+    this.#listComponent = new ListEventsView();
     this.#tripEventData = tripEventData;
     /** Рендерим список для новых событий */
     render(this.#listComponent, this.#listContainer);
@@ -44,10 +44,10 @@ export default class TripPointsPresenter {
     const prevTripPointComponent = this.#tripPointComponent;
     const prevTripPointEditComponent = this.#tripPointEditComponent;
 
-    this.#tripPointComponent = new EventItemView(this.#tripEventData, {onEditClick: this.#onEditClick, onFavoriteClick: this.#handleFavoriteClick,});
+    this.#tripPointComponent = new ItemListEventsView(this.#tripEventData, {onEditClick: this.#onEditClick, onFavoriteClick: this.#handleFavoriteClick,});
 
 
-    this.#tripPointEditComponent = new EditPointView({
+    this.#tripPointEditComponent = new EditItemListEventsView({
       tripEventData: this.#tripEventData
       , destinations: this.#tripEventData.destination
       , allDestinations: this.#destinations

@@ -39,11 +39,11 @@ function sortEventsByTime (eventA, eventB) {
 
 function sortEventsByPrice (eventA, eventB) {
 
-  if (eventA.base_price < eventB.base_price) {
+  if (eventA.base_price > eventB.base_price) {
     return -1;
   }
 
-  if (eventA.base_price > eventB.base_price) {
+  if (eventA.base_price < eventB.base_price) {
     return 1;
   }
 
