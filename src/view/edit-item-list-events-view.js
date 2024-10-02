@@ -88,7 +88,7 @@ function destinationsList({destinations}) {
   `);
 }
 
-function createEditPointTemplate(tripEventData, destinations, allDestinations) {
+function createEditItemListEventsTemplate(tripEventData, destinations, allDestinations) {
 
   const {
     basePrice = tripEventData.basePrice
@@ -159,7 +159,7 @@ function createEditPointTemplate(tripEventData, destinations, allDestinations) {
     `);
 }
 
-export default class EditPointView extends AbstractView {
+export default class EditItemListEventsView extends AbstractView {
 
   #tripEventData = null;
   #destinations = null;
@@ -186,7 +186,7 @@ export default class EditPointView extends AbstractView {
 
   get template() {
 
-    return createEditPointTemplate(this.#tripEventData, this.#destinations, this.#allDestinations);
+    return createEditItemListEventsTemplate(this.#tripEventData, this.#destinations, this.#allDestinations);
   }
 
   #formSubmitHandler = (evt) => {

@@ -1,7 +1,7 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { SortType, DisabledSortType } from '../const.js';
 
-function createSortButtonTemplate(currentSortType) {
+function createSortEventsTemplate(currentSortType) {
 
   return (`
     <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
@@ -27,7 +27,7 @@ function createSortButtonTemplate(currentSortType) {
   `);
 }
 
-export default class SortButtonView extends AbstractView {
+export default class SortEventsView extends AbstractView {
 
   #handleSortTypeChange = null;
   #currentSortType = null;
@@ -41,11 +41,15 @@ export default class SortButtonView extends AbstractView {
   }
 
   #sortTypeChangeHandler = (evt) => {
+    if (evt.target.tagName !== 'INPUT') {
+      return;
+    }
+
     evt.preventDefault();
     this.#handleSortTypeChange(evt.target.dataset.sortType);
   };
 
   get template() {
-    return createSortButtonTemplate(this.#currentSortType);
+    return createSortEventsTemplate(this.#currentSortType);
   }
 }

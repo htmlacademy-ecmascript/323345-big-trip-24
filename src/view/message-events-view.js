@@ -1,10 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-function createTripEventsMessageTemplate(message) {
+function createMessageEventsTemplate(message) {
   return `<p class="trip-events__msg">${message}</p>`;
 }
 
-export default class TripEventsMessage extends AbstractView {
+export default class MessageEventsView extends AbstractView {
 
   #message = null;
 
@@ -15,7 +15,7 @@ export default class TripEventsMessage extends AbstractView {
   }
 
   get template() {
-    return createTripEventsMessageTemplate(this.#message);
+    return createMessageEventsTemplate(this.#message);
   }
 }
 
