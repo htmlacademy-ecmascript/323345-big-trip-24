@@ -1,6 +1,6 @@
 import {EVENT_TYPES} from '../const.js';
 import { humanizeEventDate, capitalizeFirstLetter } from '../utils/utils.js';
-import AbstractStatefulView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
 function createOffersTemplate(tripEventData) {
 
@@ -185,7 +185,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     this.#handleFormSubmit = onFormSubmit;
     this.#handleCloseFormClick = onCloseFormClick;
 
-    this._setState(EditItemListEventsView.parseTripEventDataToState(this.#tripEventData, this.#allDestinations));
+    this._setState(this.parseTripEventDataToState(this.#tripEventData, this.#allDestinations));
 
     this._restoreHandlers();
   }
@@ -214,9 +214,9 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       .addEventListener('click', this.#closeFormClickHandler);
   }
 
-  static parseTripEventDataToState({tripEventData}, allDestinations) {
+  parseTripEventDataToState(tripEventData, allDestinations) {
     return {
-      tripEventData
+      ...tripEventData
       , allDestinations
     };
   }
