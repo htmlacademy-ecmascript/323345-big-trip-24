@@ -49,7 +49,6 @@ export default class TripPointsPresenter {
 
     this.#tripPointEditComponent = new EditItemListEventsView({
       tripEventData: this.#tripEventData
-      , destinations: this.#tripEventData.destination
       , allDestinations: this.#destinations
       , onFormSubmit: this.#onSubmitForm
       , onCloseFormClick: this.#onSubmitForm

@@ -1,6 +1,6 @@
 import {EVENT_TYPES} from '../const.js';
 import { humanizeEventDate, capitalizeFirstLetter } from '../utils/utils.js';
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(tripEventData) {
 
@@ -34,28 +34,31 @@ function createOffersTemplate(tripEventData) {
 function createDestinationSectionTemplate(destinations) {
   const {description = destinations.description, pictures = destinations.pictures} = destinations;
 
-  return (`
-    <section class="event__section  event__section--destination">
+  return (
+    description || pictures.length > 0
+      ? (`
+          <section class="event__section  event__section--destination">
 
-    ${description
-      ? (`<h3 class="event__section-title  event__section-title--destination">Destination</h3>
-        <p class="event__destination-description">${description}</p>`)
+          ${description
+          ? (`<h3 class="event__section-title  event__section-title--destination">Destination</h3>
+              <p class="event__destination-description">${description}</p>`)
+          : ''
+        }
+
+          ${pictures.length > 0
+          ? (`<div class="event__photos-container">
+              <div class="event__photos-tape">
+                ${pictures.map((picture) => (`
+                  <img class="event__photo" src="${picture.src}" alt="${picture.description}">
+                `))}
+              </div>
+            </div>`)
+          : ''
+        }
+          </section>
+        `)
       : ''
-    }
-
-    ${pictures.length > 0
-      ? (`<div class="event__photos-container">
-        <div class="event__photos-tape">
-          ${pictures.map((picture) => (`
-            <img class="event__photo" src="${picture.src}" alt="${picture.description}">
-          `))}
-        </div>
-      </div>`)
-      : ''
-    }
-
-    </section>
-  `);
+  );
 }
 
 function createEventTypeList() {
@@ -88,7 +91,7 @@ function destinationsList({destinations}) {
   `);
 }
 
-function createEditItemListEventsTemplate(tripEventData, destinations, allDestinations) {
+function createEditItemListEventsTemplate(tripEventData, allDestinations) {
 
   const {
     basePrice = tripEventData.basePrice
@@ -151,7 +154,7 @@ function createEditItemListEventsTemplate(tripEventData, destinations, allDestin
 
           ${createOffersTemplate(tripEventData)}
 
-          ${createDestinationSectionTemplate(destinations)}
+          ${createDestinationSectionTemplate(destination)}
 
         </section>
       </form>
@@ -159,35 +162,39 @@ function createEditItemListEventsTemplate(tripEventData, destinations, allDestin
     `);
 }
 
-export default class EditItemListEventsView extends AbstractView {
+export default class EditItemListEventsView extends AbstractStatefulView {
 
   #tripEventData = null;
-  #destinations = null;
   #allDestinations = null;
 
   #handleFormSubmit = null;
   #handleCloseFormClick = null;
 
-  constructor({tripEventData, destinations, allDestinations, onFormSubmit, onCloseFormClick}) {
+  constructor(
+    {
+      tripEventData
+      , allDestinations
+      , onFormSubmit
+      , onCloseFormClick
+    }
+  ) {
     super();
     this.#tripEventData = tripEventData;
-    this.#destinations = destinations;
     this.#allDestinations = allDestinations;
 
     this.#handleFormSubmit = onFormSubmit;
     this.#handleCloseFormClick = onCloseFormClick;
 
-    this.element.querySelector('.event.event--edit')
-      .addEventListener('submit', this.#formSubmitHandler);
+    this._setState(EditItemListEventsView.parseTripEventDataToState(this.#tripEventData, this.#allDestinations));
 
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#closeFormClickHandler);
+    this._restoreHandlers();
   }
 
   get template() {
 
-    return createEditItemListEventsTemplate(this.#tripEventData, this.#destinations, this.#allDestinations);
+    return createEditItemListEventsTemplate(this._state, this.#allDestinations);
   }
+
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
@@ -198,6 +205,25 @@ export default class EditItemListEventsView extends AbstractView {
     evt.preventDefault();
     this.#handleCloseFormClick();
   };
+
+  _restoreHandlers() {
+    this.element.querySelector('.event.event--edit')
+      .addEventListener('submit', this.#formSubmitHandler);
+
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#closeFormClickHandler);
+  }
+
+  static parseTripEventDataToState({tripEventData}, allDestinations) {
+    return {
+      tripEventData
+      , allDestinations
+    };
+  }
+
+  static parseStateToTripEventData(state) {
+    return {
+      ...state
+    };
+  }
 }
-
-
