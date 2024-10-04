@@ -1,21 +1,26 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { humanizeEventDate } from '../utils/utils.js';
 
+const MAX_DESTINATION_NAME_IN_TITLE = 3;
 
 function createHeaderTripInfoTemplate(allDestinations, allPoints) {
   function getDateAllPoints() {
 
     let eventDateStart = '';
     let eventDateEnd = '';
-    let allDestinationsStr = '';
+
     if (allPoints.length !== 0) {
       eventDateStart = allPoints[0].date_from;
       eventDateEnd = allPoints[allPoints.length - 1].date_to;
-      allDestinationsStr = allDestinations.map((destination) => (destination.name)).join(' — ');
+
+      const allDestinationsStr = (allDestinations.length > MAX_DESTINATION_NAME_IN_TITLE)
+        ? `${allDestinations[0].name} — ... — ${allDestinations[allDestinations.length - 1].name}`
+        : allDestinations.map((destination) => (destination.name)).join(' — ');
+
       return {eventDateStart, eventDateEnd, allDestinationsStr};
     }
 
-    return {eventDateStart, eventDateEnd, allDestinationsStr};
+    // return {eventDateStart, eventDateEnd};
   }
   const date = getDateAllPoints();
 

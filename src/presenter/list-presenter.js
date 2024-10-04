@@ -95,6 +95,7 @@ export default class ListPresenter {
     const tripOffers = this.#offers.getSelectedOffersByType(item.type, item.offers);
     const tripAllOffers = this.#offers.getOffersByType(item.type);
 
+
     const tripEventData = ({
       id: item.id,
       basePrice: item.base_price,
@@ -102,10 +103,10 @@ export default class ListPresenter {
       dateTo: item.date_to,
       destination: destination,
       isFavorite: item.is_favorite,
+      allOffers: this.#offers.offers,
       offers: tripOffers,
-      allOffers: tripAllOffers,
+      allOffersThisType: tripAllOffers,
       type: item.type,
-      destinationPicture: item.type,
     });
 
     return tripEventData;
