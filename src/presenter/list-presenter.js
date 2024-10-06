@@ -103,9 +103,10 @@ export default class ListPresenter {
       dateTo: item.date_to,
       destination: destination,
       isFavorite: item.is_favorite,
-      allOffers: this.#offers.offers,
       offers: tripOffers,
+      allOffers: this.#offers.offers,
       allOffersThisType: tripAllOffers,
+      allDestinations: this.#destinations.destinations,
       type: item.type,
     });
 
@@ -118,6 +119,11 @@ export default class ListPresenter {
     render(new FiltersEventsView({filters}), tripFiltersElement);
   }
 
+  /** Обновление компонента с событиями путешествия */
+  #handleModeChange = () => {
+    this.#tripPointsPresentersId.forEach((presenter) => presenter.resetView());
+  };
+
   /** Обновление данных путешествия */
   #handleTripPointChange = (updatedTripEventData) => {
 
@@ -125,11 +131,6 @@ export default class ListPresenter {
     this.#sourcedTripPoints = updateItem(this.#sourcedTripPoints, updatedTripEventData);
     this.#tripPointsPresentersId.get(updatedTripEventData.id).init(updatedTripEventData);
 
-  };
-
-  /** Обновление компонента с событиями путешествия */
-  #handleModeChange = () => {
-    this.#tripPointsPresentersId.forEach((presenter) => presenter.resetView());
   };
 
   /** Отрисовка кнопок cортировки событий путешествия */

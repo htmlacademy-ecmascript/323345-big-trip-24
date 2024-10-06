@@ -80,6 +80,7 @@ export default class TripPointsPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#tripPointComponent.reset(this.#tripEventData);
       this.#replaceFormToCard();
     }
   }
@@ -113,12 +114,12 @@ export default class TripPointsPresenter {
     this.#replaceCardToForm();
   };
 
-  #onSubmitForm = () => {
+  #onSubmitForm = (tripEventData) => {
+    this.#handleEventChange(tripEventData);
     this.#replaceFormToCard();
   };
 
   #handleFavoriteClick = () => {
     this.#handleEventChange({...this.#tripEventData, isFavorite: !this.#tripEventData.isFavorite});
-
   };
 }
