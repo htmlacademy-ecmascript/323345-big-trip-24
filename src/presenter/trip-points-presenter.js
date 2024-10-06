@@ -22,13 +22,12 @@ export default class TripPointsPresenter {
   #mode = Mode.DEFAULT;
   #handleModeChange = null;
   constructor({
-    destinations
-    , tripEventData
+    tripEventData
     , listContainer
     , onEventChange
     , onModeChange
   }) {
-    this.#destinations = destinations;
+    this.#destinations = tripEventData.allDestinations;
     this.#tripEventData = tripEventData;
     this.#listContainer = listContainer;
     this.#handleEventChange = onEventChange;
@@ -36,6 +35,7 @@ export default class TripPointsPresenter {
   }
 
   init(tripEventData) {
+
     this.#listComponent = new ListEventsView();
     this.#tripEventData = tripEventData;
     /** Рендерим список для новых событий */
@@ -49,7 +49,6 @@ export default class TripPointsPresenter {
 
     this.#tripPointEditComponent = new EditItemListEventsView({
       tripEventData: this.#tripEventData
-      , allDestinations: this.#destinations
       , onFormSubmit: this.#onSubmitForm
       , onCloseFormClick: this.#onSubmitForm
     });

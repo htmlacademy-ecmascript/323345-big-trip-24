@@ -11,11 +11,11 @@ const filter = {
 
 function sortEventsByDay (eventA, eventB) {
 
-  if (dayjs(eventA.date_from).diff(dayjs(eventB.date_from)) < 0) {
+  if (dayjs(eventA.dateFrom).diff(dayjs(eventB.dateFrom)) < 0) {
     return -1;
   }
 
-  if (dayjs(eventA.date_from).diff(dayjs(eventB.date_from)) > 0) {
+  if (dayjs(eventA.dateFrom).diff(dayjs(eventB.dateFrom)) > 0) {
     return 1;
   }
 
@@ -24,13 +24,13 @@ function sortEventsByDay (eventA, eventB) {
 
 function sortEventsByTime (eventA, eventB) {
 
-  if (dayjs(eventA.date_from).diff(dayjs(eventA.date_to)) <
-      dayjs(eventB.date_from).diff(dayjs(eventB.date_to))) {
+  if (dayjs(eventA.dateFrom).diff(dayjs(eventA.dateTo)) <
+      dayjs(eventB.dateFrom).diff(dayjs(eventB.dateTo))) {
     return -1;
   }
 
-  if (dayjs(eventA.date_from).diff(dayjs(eventA.date_to)) >
-      dayjs(eventB.date_from).diff(dayjs(eventB.date_to))) {
+  if (dayjs(eventA.dateFrom).diff(dayjs(eventA.dateTo)) >
+      dayjs(eventB.dateFrom).diff(dayjs(eventB.dateTo))) {
     return 1;
   }
 
@@ -39,11 +39,11 @@ function sortEventsByTime (eventA, eventB) {
 
 function sortEventsByPrice (eventA, eventB) {
 
-  if (eventA.base_price > eventB.base_price) {
+  if (eventA.basePrice > eventB.basePrice) {
     return -1;
   }
 
-  if (eventA.base_price < eventB.base_price) {
+  if (eventA.basePrice < eventB.basePrice) {
     return 1;
   }
 

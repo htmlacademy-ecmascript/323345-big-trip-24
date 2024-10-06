@@ -21,6 +21,7 @@ export default class ListPresenter {
   #pointsTrip = null;
   #destinations = null;
   #offers = null;
+  #tripEventDataMap = null;
 
   #noTripEventsComponent = new MessageEventsView(MESSAGE.EMPTY);
 
@@ -42,6 +43,7 @@ export default class ListPresenter {
     this.#pointsTrip = pointsTripModel.points;
     this.#destinations = destinationsTripModel;
     this.#offers = offersTripModel;
+    this.#tripEventDataMap = this.#pointsTrip.map((point) => this.#tripEventData(point));
   }
 
   init() {
@@ -127,7 +129,7 @@ export default class ListPresenter {
   /** Обновление данных путешествия */
   #handleTripPointChange = (updatedTripEventData) => {
 
-    this.#pointsTrip = updateItem(this.#pointsTrip, updatedTripEventData);
+    this.#tripEventDataMap = updateItem(this.#tripEventDataMap, updatedTripEventData);
     this.#sourcedTripPoints = updateItem(this.#sourcedTripPoints, updatedTripEventData);
     this.#tripPointsPresentersId.get(updatedTripEventData.id).init(updatedTripEventData);
 
@@ -158,16 +160,16 @@ export default class ListPresenter {
 
     switch (sortType) {
       case SortType.DAY:
-        this.#pointsTrip.sort(sortEventsByDay);
+        this.#tripEventDataMap.sort(sortEventsByDay);
         break;
       case SortType.TIME:
-        this.#pointsTrip.sort(sortEventsByTime);
+        this.#tripEventDataMap.sort(sortEventsByTime);
         break;
       case SortType.PRICE:
-        this.#pointsTrip.sort(sortEventsByPrice);
+        this.#tripEventDataMap.sort(sortEventsByPrice);
         break;
       default:
-        this.#pointsTrip = [...this.#sourcedTripPoints];
+        this.#tripEventDataMap = [...this.#sourcedTripPoints];
     }
 
     this.#currentSortType = sortType;
@@ -189,10 +191,10 @@ export default class ListPresenter {
 
 
   /** Создание события путешествия - презентер */
-  #renderTripPoint({destinations, tripEventData, listContainer}) {
+  #renderTripPoint({ tripEventData, listContainer}) {
 
     const tripPointsPresenter = new TripPointsPresenter({
-      destinations,
+
       tripEventData,
       listContainer,
       onEventChange: this.#handleTripPointChange,
@@ -204,17 +206,16 @@ export default class ListPresenter {
     this.#tripPointsPresentersId.set(tripEventData.id, tripPointsPresenter);
   }
 
+
   /** Создание списка событий путешествия */
   #renderAllTripEvents() {
 
-    this.#pointsTrip.forEach((item) =>
+    this.#tripEventDataMap.forEach((eventData) =>{
 
       this.#renderTripPoint({
-        destinations:this.#destinations
-        , tripEventData: this.#tripEventData(item)
+        tripEventData: eventData
         , listContainer: this.#listContainer
-      })
-
-    );
+      });
+    });
   }
 }

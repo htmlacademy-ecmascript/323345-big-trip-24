@@ -96,7 +96,8 @@ function createEventTypeList({checkedType}) {
   `);
 }
 
-function destinationsList(tripEventData ,allDestinations) {
+function destinationsList(tripEventData) {
+  const {allDestinations} = tripEventData;
 
   return (`
     <datalist id="destination-list-1">
@@ -107,9 +108,10 @@ function destinationsList(tripEventData ,allDestinations) {
   `);
 }
 
-function createEditItemListEventsTemplate(tripEventData, allDestinations) {
+function createEditItemListEventsTemplate(tripEventData) {
 
   const {
+
     basePrice
     , dateFrom = new Date(tripEventData.dateFrom)
     , dateTo = new Date(tripEventData.dateTo)
@@ -139,7 +141,7 @@ function createEditItemListEventsTemplate(tripEventData, allDestinations) {
             </label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
 
-              ${destinationsList(tripEventData, allDestinations)}
+              ${destinationsList(tripEventData)}
 
           </div>
 
@@ -180,7 +182,7 @@ function createEditItemListEventsTemplate(tripEventData, allDestinations) {
 export default class EditItemListEventsView extends AbstractStatefulView {
 
   #tripEventData = null;
-  #allDestinations = null;
+
 
   #handleFormSubmit = null;
   #handleCloseFormClick = null;
@@ -188,26 +190,25 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   constructor(
     {
       tripEventData
-      , allDestinations
       , onFormSubmit
       , onCloseFormClick
     }
   ) {
     super();
     this.#tripEventData = tripEventData;
-    this.#allDestinations = allDestinations.destinations;
+
 
     this.#handleFormSubmit = onFormSubmit;
     this.#handleCloseFormClick = onCloseFormClick;
 
-    this._setState(EditItemListEventsView.parseTripEventDataToState({tripEventData: this.#tripEventData, allDestinations: this.#allDestinations}));
+    this._setState(EditItemListEventsView.parseTripEventDataToState({tripEventData: this.#tripEventData, allDestinations: this.#tripEventData.allDestinations}));
 
     this._restoreHandlers();
   }
 
   get template() {
 
-    return createEditItemListEventsTemplate(this._state, this.#allDestinations);
+    return createEditItemListEventsTemplate(this._state);
   }
 
   _restoreHandlers() {
@@ -303,22 +304,29 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   #destinationInputHandler = (evt) => {
     evt.preventDefault();
 
+    const destination = this.#tripEventData.allDestinations.find((destinationItem) => (destinationItem.name === evt.target.value));
+
     this._setState({
-      destination: this.#allDestinations.find((destinationItem) => destinationItem.name === evt.target.value)
+      destination
     });
+
+    if (this.#tripEventData.allDestinations.map((dest) => dest.name).includes(evt.target.value)) {
+
+      this.updateElement({
+        destination
+      });
+    }
 
   };
 
-  static parseTripEventDataToState({tripEventData, allDestinations}) {
+  static parseTripEventDataToState({tripEventData}) {
     return {
       ...tripEventData
-      , allDestinations
     };
   }
 
   static parseStateToTripEventData(state) {
 
     return {...state};
-
   }
 }
