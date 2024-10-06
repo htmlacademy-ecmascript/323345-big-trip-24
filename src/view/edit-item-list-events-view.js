@@ -4,7 +4,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
 function createOffersTemplate(tripEventData) {
 
-  const selectedOffers = tripEventData.offers;
+  const {allOffersThisType = tripEventData.offers, selectedOffers = tripEventData.offers} = tripEventData;
 
   return (`
       <section class="event__section  event__section--offers">
@@ -12,8 +12,8 @@ function createOffersTemplate(tripEventData) {
         <div class="event__available-offers">
 
         ${
-    tripEventData.allOffersThisType.length > 0
-      ? tripEventData.allOffersThisType.map((offer) =>
+    allOffersThisType.length > 0
+      ? allOffersThisType.map((offer) =>
         (`
           <div class="event__offer-selector">
             <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="${offer.title}" ${selectedOffers.includes(offer) && 'checked'}>
@@ -36,7 +36,7 @@ function createOffersTemplate(tripEventData) {
 
 function createDestinationSectionTemplate(destinations) {
 
-  const {description = destinations[0].description, pictures = destinations[0].pictures} = destinations;
+  const {description = destinations.description, pictures = destinations.pictures} = destinations;
 
   return (
     description || pictures.length > 0
@@ -271,7 +271,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       return;
     }
 
-    const allOffersThisType = this._state.allOffers.find((offer) => offer.type === evt.target.value).offers;
+    const allOffersThisType = this.#tripEventData.allOffers.find((offer) => offer.type === evt.target.value).offers;
 
     this.updateElement({
       type: evt.target.value
@@ -307,15 +307,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       destination: this.#allDestinations.find((destinationItem) => destinationItem.name === evt.target.value)
     });
 
-    if (this.#allDestinations.includes(evt.target.value)) {
-      const destination = this.#allDestinations.filter(
-        (destinationItem) => destinationItem.name === evt.target.value
-      );
-
-      this.updateElement(
-        destination[0]
-      );
-    }
   };
 
   static parseTripEventDataToState({tripEventData, allDestinations}) {
