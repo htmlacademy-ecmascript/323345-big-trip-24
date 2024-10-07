@@ -1,42 +1,44 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanizeEventDate } from '../utils/utils.js';
+import { humanizeEventDate } from '../utils/time.js';
 
+const MAX_DESTINATION_NAME_IN_TITLE = 3;
 
-function createHeaderTripInfoTemplate(allDestinations, allPoints) {
+function createHeaderTripInfoTemplate(allDestinations, tripEventDataList) {
   function getDateAllPoints() {
 
     let eventDateStart = '';
     let eventDateEnd = '';
-    let allDestinationsStr = '';
-    if (allPoints.length !== 0) {
-      eventDateStart = allPoints[0].date_from;
-      eventDateEnd = allPoints[allPoints.length - 1].date_to;
-      allDestinationsStr = allDestinations.map((destination) => (destination.name)).join(' — ');
-      return {eventDateStart, eventDateEnd, allDestinationsStr};
+
+    if (tripEventDataList.length !== 0) {
+      eventDateStart = tripEventDataList[0].date_from;
+      eventDateEnd = tripEventDataList[tripEventDataList.length - 1].date_to;
+
+      const allDestinationsPoints = (allDestinations.length > MAX_DESTINATION_NAME_IN_TITLE)
+        ? `${allDestinations[0].name} — ... — ${allDestinations[allDestinations.length - 1].name}`
+        : allDestinations.map((destination) => (destination.name)).join(' — ');
+
+      return {eventDateStart, eventDateEnd, allDestinationsPoints};
     }
 
-    return {eventDateStart, eventDateEnd, allDestinationsStr};
+    // return {eventDateStart, eventDateEnd};
   }
   const date = getDateAllPoints();
 
   /** Без учета выбранных предложений */
   function getTotalBasePrice() {
+    const allBasePrice = tripEventDataList.length
+      ? tripEventDataList.reduce((acc, point) => acc + point.basePrice, 0)
+      : 0;
 
-    let allBasePrice = 0;
-    if (allPoints.length !== 0) {
-      allBasePrice = allPoints.reduce((acc, point) => acc + point.base_price, 0);
-      return allBasePrice;
-    }
     return allBasePrice;
   }
-
   const totalBasePrice = getTotalBasePrice();
 
 
   return (
     `<section class="trip-main__trip-info  trip-info">
             <div class="trip-info__main">
-              <h1 class="trip-info__title">${date.allDestinationsStr}</h1>
+              <h1 class="trip-info__title">${date.allDestinationsPoints}</h1>
 
               <p class="trip-info__dates">${humanizeEventDate(date.eventDateStart, 'headerDate')} — ${humanizeEventDate(date.eventDateEnd, 'headerDate')}</p>
             </div>
@@ -51,17 +53,17 @@ function createHeaderTripInfoTemplate(allDestinations, allPoints) {
 export default class HeaderTripInfoView extends AbstractView {
 
   #allDestinations = null;
-  #allPoints = null;
+  #tripEventDataList = null;
 
-  constructor({allDestinations, allPoints}) {
+  constructor({allDestinations, tripEventDataList }) {
 
     super();
     this.#allDestinations = allDestinations.destinations;
-    this.#allPoints = allPoints;
+    this.#tripEventDataList = tripEventDataList;
   }
 
   get template() {
-    return createHeaderTripInfoTemplate(this.#allDestinations, this.#allPoints);
+    return createHeaderTripInfoTemplate(this.#allDestinations, this.#tripEventDataList);
   }
 }
 

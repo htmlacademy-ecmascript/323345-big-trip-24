@@ -1,4 +1,4 @@
-import {humanizeEventDate, getDuration} from '../utils/utils.js';
+import { humanizeEventDate, getDuration } from '../utils/time.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(offers) {
@@ -18,6 +18,12 @@ function createOffersTemplate(offers) {
 }
 
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
+// Mon, 21 Oct 2024 09:19:09 GMT
+
 function createItemListEventsTemplate(tripEventData) {
 
   const {
@@ -27,13 +33,13 @@ function createItemListEventsTemplate(tripEventData) {
     , destination = tripEventData.destination
     , offers = tripEventData.offers
     , type = tripEventData.basePrice
-    , destinationPicture = tripEventData.destinationPicture
     , isFavorite = tripEventData.isFavorite
   } = tripEventData;
 
   const date = humanizeEventDate(dateFrom, 'date') ? humanizeEventDate(dateFrom, 'date') : '';
   const startTime = humanizeEventDate(dateFrom, 'time') ? humanizeEventDate(dateFrom, 'time') : '';
   const endTime = humanizeEventDate(dateTo, 'time') ? humanizeEventDate(dateTo, 'time') : '';
+  const datetime = humanizeEventDate(dateFrom, 'datetime');
   const isFavoriteClass = isFavorite
     ? 'event__favorite-btn--active'
     : '';
@@ -41,14 +47,14 @@ function createItemListEventsTemplate(tripEventData) {
   return (
     `<li class="trip-events__item">
               <div class="event">
-                <time class="event__date" datetime="${dateFrom}">${date}</time>
+                <time class="event__date" datetime="${datetime}">${date}</time>
                 <div class="event__type">
-                  <img class="event__type-icon" width="42" height="42" src="./img/icons/${destinationPicture}.png" alt="Event type icon">
+                  <img class="event__type-icon" width="42" height="42" src="./img/icons/${type}.png" alt="Event type icon">
                 </div>
                 <h3 class="event__title">${type} ${destination.name}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
-                    <ime class="event__start-time" datetime="${dateFrom}">${startTime}</time>
+                    <time class="event__start-time" datetime="${datetime}">${startTime}</time>
                     —
                     <time class="event__end-time" datetime="${dateTo}">${endTime}</time>
                   </p>

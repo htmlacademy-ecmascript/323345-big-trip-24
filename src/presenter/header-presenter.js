@@ -10,15 +10,15 @@ export default class HeaderPresenter {
 
   #pointsTrip = null;
   #destinations = null;
-  #listPoints = [];
+  #tripEventDataList = [];
 
-  constructor({destinations, listPoints}) {
-    this.#listPoints = listPoints;
+  constructor({destinations, tripEventDataList}) {
+    this.#tripEventDataList = tripEventDataList;
     this.#destinations = destinations;
   }
 
   init() {
-    this.#listPoints = [...this.#listPoints];
+    this.#tripEventDataList = [...this.#tripEventDataList];
 
     this.#renderTripHeader();
 
@@ -27,7 +27,7 @@ export default class HeaderPresenter {
 
   /** Создание шапки сайта */
   #renderTripHeader() {
-    render(new HeaderTripInfoView({allDestinations: this.#destinations , allPoints: this.#listPoints}), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
+    render(new HeaderTripInfoView({allDestinations: this.#destinations , tripEventDataList: this.#tripEventDataList}), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
 
     render(new ButtonAddNewEventView(), tripMain); // Заголовок, кнопка добавить событие
   }
