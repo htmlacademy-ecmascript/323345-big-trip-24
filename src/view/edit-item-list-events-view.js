@@ -350,8 +350,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
 
     this.#flatpickrDateFrom = flatpickr(this.element.querySelector('#event-start-time-1'), {
       enableTime: true
-      // eslint-disable-next-line camelcase
-      , time_24hr: true
+      , 'time_24hr': true
       , dateFormat: 'd/m/y H:i'
       , defaultDate: humanizeEventDate(this._state.dateFrom, 'eventTime')
       , maxDate: humanizeEventDate(this._state.dateTo, 'eventTime')
@@ -360,8 +359,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
 
     this.#flatpickrDateTo = flatpickr(this.element.querySelector('#event-end-time-1'), {
       enableTime: true
-      // eslint-disable-next-line camelcase
-      , time_24hr: true
+      , 'time_24hr': true
       , dateFormat: 'd/m/y H:i'
       , defaultDate: humanizeEventDate(this._state.dateTo, 'eventTime')
       , minDate: humanizeEventDate(this._state.dateFrom, 'eventTime')
@@ -369,8 +367,14 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     });
   }
 
+  /**
+   *
+   * @param {*} selectedDates Массив выбранных дат. Если пользователь выбрал один день, то в массиве будет только одна дата. Если пользователь выбрал диапазон дат, то в массиве будут две даты: начало и конец диапазона.
+   * @param {*} dateStr Строка, представляющая выбранную дату или диапазон дат в формате, заданном в настройках плагина.
+   * @param {*} instance Объект, представляющий текущий экземпляр плагина flatpickr.
+   */
   #dateChangeHandler = (selectedDates, dateStr, instance) => {
-
+    // dateStr default value this library return in format "2021-11-15T20:00:00"
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
         dateFrom: getUtcTimeFromLocal(selectedDates)
