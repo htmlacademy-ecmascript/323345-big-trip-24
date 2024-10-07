@@ -87,7 +87,7 @@ export default class TripPointsPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#replaceFormToCard();
+      this.#onSubmitForm(this.#tripEventData);
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     }
   };
