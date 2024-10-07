@@ -1,3 +1,6 @@
+import 'flatpickr/dist/flatpickr.min.css';
+import 'flatpickr/dist/themes/material_blue.css';
+
 import ListPresenter from './presenter/list-presenter.js';
 import PointsTripModel from './model/points-trip-model.js';
 import OffersTripsModel from './model/offers-trip-model.js';

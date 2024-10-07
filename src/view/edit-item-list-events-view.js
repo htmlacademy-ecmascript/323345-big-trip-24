@@ -1,6 +1,9 @@
 import {EVENT_TYPES} from '../const.js';
-import { humanizeEventDate, capitalizeFirstLetter } from '../utils/utils.js';
+import { capitalizeFirstLetter } from '../utils/utils.js';
+import { humanizeEventDate, getUtcTimeFromLocal } from '../utils/time.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import flatpickr from 'flatpickr';
+
 
 function createOffersTemplate(tripEventData) {
 
@@ -187,6 +190,8 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleCloseFormClick = null;
 
+  #flatpickrDateFrom = null;
+  #flatpickrDateTo = null;
   constructor(
     {
       tripEventData
@@ -233,6 +238,9 @@ export default class EditItemListEventsView extends AbstractStatefulView {
 
     this.element.querySelector('.event__reset-btn')
       .addEventListener('click', this.#closeFormClickHandler);
+
+    this.#setFlatpickrTripEvent();
+
   }
 
   reset(tripEventData) {
@@ -240,6 +248,20 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     this.updateElement(
       EditItemListEventsView.parseTripPointToState(tripEventData)
     );
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#flatpickrDateFrom) {
+      this.#flatpickrDateFrom.destroy();
+      this.#flatpickrDateFrom = null;
+    }
+
+    if (this.#flatpickrDateTo) {
+      this.#flatpickrDateTo.destroy();
+      this.#flatpickrDateTo = null;
+    }
   }
 
   #offersChangeHandler = (evt) => {
@@ -284,8 +306,14 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
 
+    const EventPrice = Number(evt.target.value);
+
+    if (!EventPrice) {
+      return;
+    }
+
     this.updateElement({
-      basePrice: Number(evt.target.value),
+      basePrice: EventPrice,
     });
   };
 
@@ -316,7 +344,49 @@ export default class EditItemListEventsView extends AbstractStatefulView {
         destination
       });
     }
+  };
 
+  #setFlatpickrTripEvent() {
+
+    this.#flatpickrDateFrom = flatpickr(this.element.querySelector('#event-start-time-1'), {
+      enableTime: true
+      // eslint-disable-next-line camelcase
+      , time_24hr: true
+      , dateFormat: 'd/m/y H:i'
+      , defaultDate: humanizeEventDate(this._state.dateFrom, 'eventTime')
+      , maxDate: humanizeEventDate(this._state.dateTo, 'eventTime')
+      , onClose: this.#dateChangeHandler
+    });
+
+    this.#flatpickrDateTo = flatpickr(this.element.querySelector('#event-end-time-1'), {
+      enableTime: true
+      // eslint-disable-next-line camelcase
+      , time_24hr: true
+      , dateFormat: 'd/m/y H:i'
+      , defaultDate: humanizeEventDate(this._state.dateTo, 'eventTime')
+      , minDate: humanizeEventDate(this._state.dateFrom, 'eventTime')
+      , onClose: this.#dateChangeHandler
+    });
+  }
+
+  #dateChangeHandler = (selectedDates, dateStr, instance) => {
+
+    if (instance === this.#flatpickrDateFrom) {
+      this.updateElement({
+        dateFrom: getUtcTimeFromLocal(selectedDates)
+      });
+    } else if (instance === this.#flatpickrDateTo) {
+      this.updateElement({
+        dateTo: getUtcTimeFromLocal(selectedDates)
+      });
+    }
+
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateTo: getUtcTimeFromLocal(userDate)
+    });
   };
 
   static parseTripEventDataToState({tripEventData}) {

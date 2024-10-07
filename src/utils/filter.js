@@ -11,11 +11,11 @@ const filter = {
 
 function sortEventsByDay (eventA, eventB) {
 
-  if (dayjs(eventA.dateFrom).diff(dayjs(eventB.dateFrom)) < 0) {
+  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventB.dateFrom)) < 0) {
     return -1;
   }
 
-  if (dayjs(eventA.dateFrom).diff(dayjs(eventB.dateFrom)) > 0) {
+  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventB.dateFrom)) > 0) {
     return 1;
   }
 
@@ -24,13 +24,13 @@ function sortEventsByDay (eventA, eventB) {
 
 function sortEventsByTime (eventA, eventB) {
 
-  if (dayjs(eventA.dateFrom).diff(dayjs(eventA.dateTo)) <
-      dayjs(eventB.dateFrom).diff(dayjs(eventB.dateTo))) {
+  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventA.dateTo)) <
+      dayjs.utc(eventB.dateFrom).diff(dayjs.utc(eventB.dateTo))) {
     return -1;
   }
 
-  if (dayjs(eventA.dateFrom).diff(dayjs(eventA.dateTo)) >
-      dayjs(eventB.dateFrom).diff(dayjs(eventB.dateTo))) {
+  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventA.dateTo)) >
+      dayjs.utc(eventB.dateFrom).diff(dayjs.utc(eventB.dateTo))) {
     return 1;
   }
 

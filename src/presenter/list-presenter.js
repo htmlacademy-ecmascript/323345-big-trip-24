@@ -11,7 +11,6 @@ import SortEventsView from '../view/sort-events-view.js';
 import HeaderPresenter from './header-presenter.js';
 import TripPointsPresenter from './trip-points-presenter.js';
 
-
 const tripFiltersElement = document.querySelector('.trip-controls__filters');
 
 
@@ -21,7 +20,7 @@ export default class ListPresenter {
   #pointsTrip = null;
   #destinations = null;
   #offers = null;
-  #tripEventDataMap = null;
+  #tripEventDataList = null;
 
   #noTripEventsComponent = new MessageEventsView(MESSAGE.EMPTY);
 
@@ -43,7 +42,7 @@ export default class ListPresenter {
     this.#pointsTrip = pointsTripModel.points;
     this.#destinations = destinationsTripModel;
     this.#offers = offersTripModel;
-    this.#tripEventDataMap = this.#pointsTrip.map((point) => this.#tripEventData(point));
+    this.#tripEventDataList = this.#pointsTrip.map((point) => this.#tripEventData(point));
   }
 
   init() {
@@ -54,7 +53,7 @@ export default class ListPresenter {
     /** Передаем данные в презентер шапки */
     this.#headerPresenter({
       destinations:this.#destinations
-      , listPoints: this.#listPoints
+      , tripEventDataList: this.#tripEventDataList
     });
 
     /** Отрисовка компонента фильтрации */
@@ -80,15 +79,6 @@ export default class ListPresenter {
       /** Рендерим список событий */
       this.#renderAllTripEvents();
     }
-  }
-
-  #headerPresenter({destinations, listPoints, sourcedTripPoints}) {
-    const headerPresenter = new HeaderPresenter({
-      destinations
-      , listPoints
-      , sourcedTripPoints
-    });
-    return headerPresenter.init();
   }
 
   /** Елемент события путешествия */
@@ -129,11 +119,22 @@ export default class ListPresenter {
   /** Обновление данных путешествия */
   #handleTripPointChange = (updatedTripEventData) => {
 
-    this.#tripEventDataMap = updateItem(this.#tripEventDataMap, updatedTripEventData);
+    this.#tripEventDataList = updateItem(this.#tripEventDataList, updatedTripEventData);
     this.#sourcedTripPoints = updateItem(this.#sourcedTripPoints, updatedTripEventData);
     this.#tripPointsPresentersId.get(updatedTripEventData.id).init(updatedTripEventData);
 
   };
+
+
+  #headerPresenter({destinations, tripEventDataList, sourcedTripPoints}) {
+
+    const headerPresenter = new HeaderPresenter({
+      destinations
+      , tripEventDataList
+      , sourcedTripPoints
+    });
+    return headerPresenter.init();
+  }
 
   /** Отрисовка кнопок cортировки событий путешествия */
   #renderSort() {
@@ -160,16 +161,16 @@ export default class ListPresenter {
 
     switch (sortType) {
       case SortType.DAY:
-        this.#tripEventDataMap.sort(sortEventsByDay);
+        this.#tripEventDataList.sort(sortEventsByDay);
         break;
       case SortType.TIME:
-        this.#tripEventDataMap.sort(sortEventsByTime);
+        this.#tripEventDataList.sort(sortEventsByTime);
         break;
       case SortType.PRICE:
-        this.#tripEventDataMap.sort(sortEventsByPrice);
+        this.#tripEventDataList.sort(sortEventsByPrice);
         break;
       default:
-        this.#tripEventDataMap = [...this.#sourcedTripPoints];
+        this.#tripEventDataList = [...this.#sourcedTripPoints];
     }
 
     this.#currentSortType = sortType;
@@ -210,7 +211,7 @@ export default class ListPresenter {
   /** Создание списка событий путешествия */
   #renderAllTripEvents() {
 
-    this.#tripEventDataMap.forEach((eventData) =>{
+    this.#tripEventDataList.forEach((eventData) =>{
 
       this.#renderTripPoint({
         tripEventData: eventData
