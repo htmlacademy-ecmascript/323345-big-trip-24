@@ -244,10 +244,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   }
 
   reset(tripEventData) {
-
-    this.updateElement(
-      EditItemListEventsView.parseTripPointToState(tripEventData)
-    );
+    this.updateElement(tripEventData);
   }
 
   removeElement() {

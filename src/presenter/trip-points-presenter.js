@@ -79,7 +79,7 @@ export default class TripPointsPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#tripPointComponent.reset(this.#tripEventData);
+      this.#tripPointEditComponent.reset(this.#tripEventData);
       this.#replaceFormToCard();
     }
   }
