@@ -41,17 +41,17 @@ export default class TripPointsPresenter {
     /** Рендерим список для новых событий */
     render(this.#listComponent, this.#listContainer);
 
+    this.#createTripPointComponent();
+  }
+
+  #createTripPointComponent() {
     const prevTripPointComponent = this.#tripPointComponent;
     const prevTripPointEditComponent = this.#tripPointEditComponent;
 
     this.#tripPointComponent = new ItemListEventsView(this.#tripEventData, {onEditClick: this.#onEditClick, onFavoriteClick: this.#handleFavoriteClick,});
 
-
-    this.#tripPointEditComponent = new EditItemListEventsView({
-      tripEventData: this.#tripEventData
-      , onFormSubmit: this.#onSubmitForm
-      , onCloseFormClick: this.#onSubmitForm
-    });
+    /** Инициализируем компонент для редактирования события */
+    this.#createTripPointEditComponent() ;
 
     if (prevTripPointComponent === null || prevTripPointEditComponent === null) {
       render(this.#tripPointComponent, this.#listComponent.element);
@@ -62,7 +62,6 @@ export default class TripPointsPresenter {
       replace(this.#tripPointComponent, prevTripPointComponent);
     }
 
-
     if (this.#mode === Mode.EDITING) {
       replace(this.#tripPointEditComponent, prevTripPointEditComponent);
     }
@@ -71,12 +70,26 @@ export default class TripPointsPresenter {
     remove(prevTripPointEditComponent);
   }
 
+  /**
+   * Создает компонент для редактирования события
+   */
+  #createTripPointEditComponent() {
+    this.#tripPointEditComponent = new EditItemListEventsView({
+      tripEventData: this.#tripEventData
+      , onFormSubmit: this.#onSubmitForm
+      , onCloseFormClick: this.#onSubmitForm
+    });
+  }
+
 
   destroy() {
     remove(this.#tripPointComponent);
     remove(this.#tripPointEditComponent);
   }
 
+  /**
+   * Метод для сброса компонента в начальное состояние
+   */
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#tripPointEditComponent.reset(this.#tripEventData);
@@ -84,6 +97,10 @@ export default class TripPointsPresenter {
     }
   }
 
+  /**
+   * Регулирует поведение при нажатии на кнопку Esc
+   * @param {evt} event событие на кнопку Esc
+   */
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
@@ -92,6 +109,11 @@ export default class TripPointsPresenter {
     }
   };
 
+  /**
+   * Метод для редактирования события
+   * Записывает стейт редактируемого компонента
+   *  в начальные данные (сохраняет изменения)
+   */
   #replaceCardToForm() {
 
     replace(this.#tripPointEditComponent, this.#tripPointComponent);
@@ -101,6 +123,10 @@ export default class TripPointsPresenter {
     this.#mode = Mode.EDITING;
   }
 
+  /**
+   * Метод для редактирования события
+   * Сбрасывает стейт редактируемого компонента
+   */
   #replaceFormToCard() {
 
     replace(this.#tripPointComponent, this.#tripPointEditComponent);

@@ -206,6 +206,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     this.#handleFormSubmit = onFormSubmit;
     this.#handleCloseFormClick = onCloseFormClick;
 
+    /** Инициализирует стейт из начальных данных*/
     this._setState(EditItemListEventsView.parseTripEventDataToState({tripEventData: this.#tripEventData, allDestinations: this.#tripEventData.allDestinations}));
 
     this._restoreHandlers();
@@ -216,6 +217,9 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     return createEditItemListEventsTemplate(this._state);
   }
 
+  /**
+   * Группирует все обработчики событий
+   */
   _restoreHandlers() {
 
     this.element.querySelector('.event.event--edit')
@@ -243,10 +247,17 @@ export default class EditItemListEventsView extends AbstractStatefulView {
 
   }
 
+  /**
+   * Сбрасывает стейт до начальных данных
+   * @param {object} tripEventData начальные данные
+   */
   reset(tripEventData) {
     this.updateElement(tripEventData);
   }
 
+  /**
+   * Удаляет элемент flatpickr
+   */
   removeElement() {
     super.removeElement();
 
@@ -261,6 +272,11 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
   }
 
+  /**
+	 * Выбираем нужные предложения
+	 * @param {evt} event событие на каждом предложении
+	 * @returns выбранныое предложение
+	 */
   #offersChangeHandler = (evt) => {
     evt.preventDefault();
 
@@ -284,6 +300,12 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     });
   };
 
+  /**
+	 * Выбираем вид путешествия и согласно выбранному типу
+	 *  отображаем возможные офферы
+	 * @param {evt} event событие на изменении типа путешествия
+	 * @returns Все виды офферов для подобного типа путешествия
+	 */
   #eventTypeChangeHandler = (evt) => {
     evt.preventDefault();
 
@@ -300,6 +322,11 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     });
   };
 
+  /**
+	 * Сохранет ценну в стейт
+	 * @param {evt} event событие на изменении цены
+	 * @returns сохраняет ценну
+	 */
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
 
@@ -314,26 +341,36 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     });
   };
 
+  /**
+	 * Сохраняет выбранные данные из стейта в реальные данные
+	 * @param {evt} event событие на кнопке сохранения
+	 */
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
 
     this.#handleFormSubmit(EditItemListEventsView.parseStateToTripEventData(this._state));
   };
 
+  /**
+   * Закрывает и сбрасывает стейт до начального.
+   * @param {evt} event событие на кнопке закрытия
+   */
   #closeFormClickHandler = (evt) => {
     evt.preventDefault();
 
     this.#handleCloseFormClick(this.#tripEventData);
   };
 
+  /**
+   * Ищет пункт назначения по названию сравнивая его с названиями
+   *  пунктов назначения и закидывает выбранный в стейт
+   * @param {evt} event - событие на поле ввода
+   * @returns {string} - название пункта назначения
+   */
   #destinationInputHandler = (evt) => {
     evt.preventDefault();
 
     const destination = this.#tripEventData.allDestinations.find((destinationItem) => (destinationItem.name === evt.target.value));
-
-    this._setState({
-      destination
-    });
 
     if (this.#tripEventData.allDestinations.map((dest) => dest.name).includes(evt.target.value)) {
 
@@ -343,6 +380,14 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
   };
 
+  /**
+   *  Настройки календаря для flatpickr
+   * enableTime: true - включает ввод времени
+   * dateFormat: 'd/m/y H:i' - формат даты
+   * defaultDate дата по умолчанию
+   * maxDate, minDate - максимальная и минимальная дата
+   * onClose - срабатывает при закрытии календаря
+   */
   #setFlatpickrTripEvent() {
 
     this.#flatpickrDateFrom = flatpickr(this.element.querySelector('#event-start-time-1'), {
