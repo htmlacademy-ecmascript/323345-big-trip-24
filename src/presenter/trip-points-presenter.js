@@ -79,7 +79,7 @@ export default class TripPointsPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#tripPointComponent.reset(this.#tripEventData);
+      this.#tripPointEditComponent.reset(this.#tripEventData);
       this.#replaceFormToCard();
     }
   }
@@ -87,7 +87,7 @@ export default class TripPointsPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#replaceFormToCard();
+      this.#onSubmitForm(this.#tripEventData);
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     }
   };

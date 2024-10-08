@@ -244,10 +244,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   }
 
   reset(tripEventData) {
-
-    this.updateElement(
-      EditItemListEventsView.parseTripPointToState(tripEventData)
-    );
+    this.updateElement(tripEventData);
   }
 
   removeElement() {
@@ -374,7 +371,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    * @param {*} instance Объект, представляющий текущий экземпляр плагина flatpickr.
    */
   #dateChangeHandler = (selectedDates, dateStr, instance) => {
-    // dateStr default value this library return in format "2021-11-15T20:00:00"
+    // dateStr default value this library
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
         dateFrom: getUtcTimeFromLocal(selectedDates)
@@ -385,12 +382,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       });
     }
 
-  };
-
-  #dateToChangeHandler = ([userDate]) => {
-    this.updateElement({
-      dateTo: getUtcTimeFromLocal(userDate)
-    });
   };
 
   static parseTripEventDataToState({tripEventData}) {
