@@ -1,7 +1,7 @@
 import {destinations} from '../mock/destinations.js';
 
 export default class DestinationsTripModel {
-  #destinations;
+  #destinations = null;
   constructor() {
     this.#destinations = destinations;
   }

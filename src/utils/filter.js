@@ -1,5 +1,4 @@
 import { FilterType } from '../const.js';
-import dayjs from 'dayjs';
 
 const filter = {
   [FilterType.EVERYTHING]: (pointsTrip) => pointsTrip,
@@ -8,46 +7,11 @@ const filter = {
   [FilterType.PAST]: (pointsTrip) => pointsTrip.filter((pointTrip) => new Date(pointTrip.date_to) < Date.now()),
 };
 
+const NoPointTextByFilter = {
+  [FilterType.EVERYTHING]: 'Click New Event to create your first point',
+  [FilterType.FUTURE]: 'There are no future events now',
+  [FilterType.PAST]: 'There are no past events now',
+  [FilterType.PRESENT]: 'There are no present events now',
+};
 
-function sortEventsByDay (eventA, eventB) {
-
-  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventB.dateFrom)) < 0) {
-    return -1;
-  }
-
-  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventB.dateFrom)) > 0) {
-    return 1;
-  }
-
-  return 0;
-}
-
-function sortEventsByTime (eventA, eventB) {
-
-  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventA.dateTo)) <
-      dayjs.utc(eventB.dateFrom).diff(dayjs.utc(eventB.dateTo))) {
-    return -1;
-  }
-
-  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventA.dateTo)) >
-      dayjs.utc(eventB.dateFrom).diff(dayjs.utc(eventB.dateTo))) {
-    return 1;
-  }
-
-  return 0;
-}
-
-function sortEventsByPrice (eventA, eventB) {
-
-  if (eventA.basePrice > eventB.basePrice) {
-    return -1;
-  }
-
-  if (eventA.basePrice < eventB.basePrice) {
-    return 1;
-  }
-
-  return 0;
-}
-
-export { filter, sortEventsByDay, sortEventsByTime, sortEventsByPrice };
+export { filter, NoPointTextByFilter };

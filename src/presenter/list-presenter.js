@@ -1,10 +1,10 @@
-import { render } from '../framework/render.js';
-import { MESSAGE, SortType } from '../const.js';
-import { generateFilter } from '../mock/filter.js';
-import { updateItem } from '../utils/utils.js';
-import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/filter.js';
+import { render, remove } from '../framework/render.js';
+import { MESSAGE, SortType, FilterType, UpdateType, UserAction } from '../const.js';
+// import { generateFilter } from '../mock/filter.js';
+import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/sort.js';
+import { filter } from '../utils/filter.js';
 
-import FiltersEventsView from '../view/filters-events-view.js';
+import FiltersPresenter from './filters-presenter.js';
 import MessageEventsView from '../view/message-events-view.js';
 import SortEventsView from '../view/sort-events-view.js';
 
@@ -17,50 +17,62 @@ const tripFiltersElement = document.querySelector('.trip-controls__filters');
 export default class ListPresenter {
 
   #listContainer = null;
-  #pointsTrip = null;
-  #destinations = null;
-  #offers = null;
-  #tripEventDataList = null;
-
-  #noTripEventsComponent = new MessageEventsView(MESSAGE.EMPTY);
+  #pointsTripModel = null;
+  #destinationsModel = null;
+  #offersModel = null;
+  #filtersModel = null;
 
   #tripPointsPresentersId = new Map();
-
-  #listPoints = [];
+  #noTripEventsComponent = new MessageEventsView(MESSAGE.EMPTY);
 
   #sortComponent = null;
-  #sourcedTripPoints = [];
   #currentSortType = SortType.DAY;
+  #filterType = FilterType.EVERYTHING;
 
   constructor({
     listContainer
     , pointsTripModel
     , destinationsTripModel
     , offersTripModel
+    , filtersModel
   }) {
     this.#listContainer = listContainer;
-    this.#pointsTrip = pointsTripModel.points;
-    this.#destinations = destinationsTripModel;
-    this.#offers = offersTripModel;
-    this.#tripEventDataList = this.#pointsTrip.map((point) => this.#tripEventData(point));
+    this.#pointsTripModel = pointsTripModel;
+    this.#destinationsModel = destinationsTripModel;
+    this.#offersModel = offersTripModel;
+    this.#filtersModel = filtersModel;
+
+    this.#pointsTripModel.addObserver(this.#handleModelEvent);
+    this.#filtersModel.addObserver(this.#handleModelEvent);
+  }
+
+  get pointsTrip() {
+    this.#filterType = this.#filtersModel.filter;
+    const pointsTrip = this.#pointsTripModel.points;
+    const filteredTripPoints = filter[this.#filterType](pointsTrip);
+
+    switch (this.#currentSortType) {
+      case SortType.DAY:
+        return filteredTripPoints.sort(sortEventsByDay);
+      case SortType.TIME:
+        return filteredTripPoints.sort(sortEventsByTime);
+      case SortType.PRICE:
+        return filteredTripPoints.sort(sortEventsByPrice);
+    }
+
+    return filteredTripPoints;
   }
 
   init() {
-    this.#listPoints = [...this.#pointsTrip];
-    /** Копируем список событий, что бы можно было вернуть к изначальному виду */
-    this.#sourcedTripPoints = [...this.#pointsTrip];
 
     /** Передаем данные в презентер шапки */
     this.#headerPresenter({
-      destinations:this.#destinations
-      , tripEventDataList: this.#tripEventDataList
+      destinations:this.#destinationsModel
+      , tripEventDataList: this.#createTripEventDataList()
     });
 
     /** Отрисовка компонента фильтрации */
     this.#renderFilters();
-
-    /** Отрисовка компонента сортировки */
-    this.#renderSort();
 
     /** Отрисовка всех компонентов путешествия */
     this.#renderList();
@@ -69,23 +81,32 @@ export default class ListPresenter {
 
   #renderList() {
 
-    if (this.#listPoints.length === 0) {
+    if (this.pointsTrip.length === 0) {
       /** Если список событий пуст, то отрисовываем сообщение */
       render(this.#noTripEventsComponent, this.#listContainer);
 
     } else {
       /** Если список событий не пуст, то отрисовываем события */
 
+      /** Отрисовка компонента сортировки */
+      this.#renderSort();
+
       /** Рендерим список событий */
       this.#renderAllTripEvents();
     }
   }
 
+  #createTripEventDataList() {
+
+    const tripEventDataList = this.pointsTrip.map((point) => this.#tripEventData(point));
+    return tripEventDataList;
+  }
+
   /** Елемент события путешествия */
   #tripEventData(item) {
-    const destination = this.#destinations.getDestinationById(item);
-    const tripOffers = this.#offers.getSelectedOffersByType(item.type, item.offers);
-    const tripAllOffers = this.#offers.getOffersByType(item.type);
+    const destination = this.#destinationsModel.getDestinationById(item);
+    const tripOffers = this.#offersModel.getSelectedOffersByType(item.type, item.offers);
+    const tripAllOffers = this.#offersModel.getOffersByType(item.type);
 
 
     const tripEventData = ({
@@ -96,9 +117,9 @@ export default class ListPresenter {
       destination: destination,
       isFavorite: item.is_favorite,
       offers: tripOffers,
-      allOffers: this.#offers.offers,
+      allOffers: this.#offersModel.offers,
       allOffersThisType: tripAllOffers,
-      allDestinations: this.#destinations.destinations,
+      allDestinations: this.#destinationsModel.destinations,
       type: item.type,
     });
 
@@ -106,9 +127,13 @@ export default class ListPresenter {
   }
 
   #renderFilters() {
-    const filters = generateFilter();
 
-    render(new FiltersEventsView({filters}), tripFiltersElement);
+    const filtersPresenter = new FiltersPresenter({
+      filterContainer: tripFiltersElement,
+      filtersModel: this.#filtersModel,
+      pointsTripModel: this.#pointsTripModel,
+    });
+    return filtersPresenter.init();
   }
 
   /** Обновление компонента с событиями путешествия */
@@ -117,14 +142,38 @@ export default class ListPresenter {
   };
 
   /** Обновление данных путешествия */
-  #handleTripPointChange = (updatedTripEventData) => {
+  #handleViewAction = (actionType, updateType, update) => {
+    const updateParse = {id: update.id, 'base_price': update.basePrice, 'date_from': update.dateFrom, 'date_to': update.dateTo, destination: update.destination, 'is_favorite': update.isFavorite, offers: update.offers, type: update.type};
 
-    this.#tripEventDataList = updateItem(this.#tripEventDataList, updatedTripEventData);
-    this.#sourcedTripPoints = updateItem(this.#sourcedTripPoints, updatedTripEventData);
-    this.#tripPointsPresentersId.get(updatedTripEventData.id).init(updatedTripEventData);
-
+    switch (actionType) {
+      case UserAction.UPDATE_POINT:
+        this.#pointsTripModel.updatePoint(updateType, updateParse);
+        break;
+      case UserAction.ADD_POINT:
+        this.#pointsTripModel.addPoint(updateType, updateParse);
+        break;
+      case UserAction.DELETE_POINT:
+        this.#pointsTripModel.deletePoint(updateType, updateParse);
+        break;
+    }
   };
 
+  #handleModelEvent = (updateType, data) => {
+    const dataParse = {id: data.id, 'base_price': data.basePrice, 'date_from': data.dateFrom, 'date_to': data.dateTo, destination: data.destination, 'is_favorite': data.isFavorite, offers: data.offers, type: data.type};
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.#tripPointsPresentersId.get(dataParse.id).init(dataParse);
+        break;
+      case UpdateType.MINOR:
+        this.#clearTripPointList();
+        this.#renderList();
+        break;
+      case UpdateType.MAJOR:
+        this.#clearTripPointList({ resetSortType: true });
+        this.#renderList();
+        break;
+    }
+  };
 
   #headerPresenter({destinations, tripEventDataList, sourcedTripPoints}) {
 
@@ -146,36 +195,6 @@ export default class ListPresenter {
     render(this.#sortComponent, this.#listContainer);
   }
 
-  /** Очистка компонента с событиями путешествия */
-  #clearTripPointList() {
-    this.#tripPointsPresentersId.forEach((presenter) => presenter.destroy());
-    this.#tripPointsPresentersId.clear();
-  }
-
-
-  /** Сортировка событий путешествия
-  * @param {string} sortType тип сортировки (default = day)
-  * @return {array} отсортированный список событий
-  * */
-  #sortTripPoints(sortType) {
-
-    switch (sortType) {
-      case SortType.DAY:
-        this.#tripEventDataList.sort(sortEventsByDay);
-        break;
-      case SortType.TIME:
-        this.#tripEventDataList.sort(sortEventsByTime);
-        break;
-      case SortType.PRICE:
-        this.#tripEventDataList.sort(sortEventsByPrice);
-        break;
-      default:
-        this.#tripEventDataList = [...this.#sourcedTripPoints];
-    }
-
-    this.#currentSortType = sortType;
-  }
-
   /** Перерисовывает события согласно типу сортировки
   * @param {string} sortType - тип сортировки
   * @run Отрисовку всех событий путешествия согласно типу сортировки
@@ -184,10 +203,9 @@ export default class ListPresenter {
     if (this.#currentSortType === sortType) {
       return;
     }
-
-    this.#sortTripPoints(sortType);
+    this.#currentSortType = sortType;
     this.#clearTripPointList();
-    this. #renderAllTripEvents();
+    this.#renderList();
   };
 
 
@@ -198,7 +216,7 @@ export default class ListPresenter {
 
       tripEventData,
       listContainer,
-      onEventChange: this.#handleTripPointChange,
+      onEventChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
     });
 
@@ -211,12 +229,29 @@ export default class ListPresenter {
   /** Создание списка событий путешествия */
   #renderAllTripEvents() {
 
-    this.#tripEventDataList.forEach((eventData) =>{
+    this.#createTripEventDataList().forEach((eventData) =>{
 
       this.#renderTripPoint({
         tripEventData: eventData
         , listContainer: this.#listContainer
       });
     });
+  }
+
+  /** Очистка компонента с событиями путешествия */
+  #clearTripPointList({ resetSortType = false } = {}) {
+
+    this.#tripPointsPresentersId.forEach((presenter) => presenter.destroy());
+    this.#tripPointsPresentersId.clear();
+
+    remove(this.#sortComponent);
+
+    if (this.#noTripEventsComponent) {
+      remove(this.#noTripEventsComponent);
+    }
+
+    if (resetSortType) {
+      this.#currentSortType = SortType.DAY;
+    }
   }
 }

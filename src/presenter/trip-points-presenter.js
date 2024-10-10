@@ -1,4 +1,5 @@
 import { render, replace, remove } from '../framework/render.js';
+import { UserAction, UpdateType } from '../const.js';
 
 import ListEventsView from '../view/list-events-view.js';
 import ItemListEventsView from '../view/item-list-events-view.js';
@@ -140,11 +141,17 @@ export default class TripPointsPresenter {
   };
 
   #onSubmitForm = (tripEventData) => {
-    this.#handleEventChange(tripEventData);
+    this.#handleEventChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      tripEventData);
     this.#replaceFormToCard();
   };
 
   #handleFavoriteClick = () => {
-    this.#handleEventChange({...this.#tripEventData, isFavorite: !this.#tripEventData.isFavorite});
+    this.#handleEventChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      {...this.#tripEventData, isFavorite: !this.#tripEventData.isFavorite});
   };
 }

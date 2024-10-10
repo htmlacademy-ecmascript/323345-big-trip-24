@@ -1,8 +1,9 @@
+import flatpickr from 'flatpickr';
+
 import {EVENT_TYPES} from '../const.js';
 import { capitalizeFirstLetter } from '../utils/utils.js';
 import { humanizeEventDate, getUtcTimeFromLocal } from '../utils/time.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import flatpickr from 'flatpickr';
 
 
 function createOffersTemplate(tripEventData) {
