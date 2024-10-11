@@ -6,6 +6,7 @@ import { filter } from '../utils/filter.js';
 import FiltersPresenter from './filters-presenter.js';
 import MessageEventsView from '../view/message-events-view.js';
 import SortEventsView from '../view/sort-events-view.js';
+import ListEventsView from '../view/list-events-view.js';
 
 import TripPointsPresenter from './trip-points-presenter.js';
 
@@ -22,6 +23,7 @@ export default class ListPresenter {
 
   #tripPointsPresentersId = new Map();
   #noTripEventsComponent = null;
+  #listComponent = null;
 
   #sortComponent = null;
   #currentSortType = SortType.DAY;
@@ -40,15 +42,17 @@ export default class ListPresenter {
     this.#offersModel = offersTripModel;
     this.#filtersModel = filtersModel;
 
+    this.#listComponent = new ListEventsView();
+
     /** Подписываемся на изменение данных модели и прокидываем callback */
     this.#pointsTripModel.addObserver(this.#handleModelEvent);
     this.#filtersModel.addObserver(this.#handleModelEvent);
   }
 
-  get pointsTrip() {
+  get tripPoints() {
     this.#filterType = this.#filtersModel.filter;
-    const pointsTrip = this.#pointsTripModel.points;
-    const filteredTripPoints = filter[this.#filterType](pointsTrip);
+    const tripPoints = this.#pointsTripModel.points;
+    const filteredTripPoints = filter[this.#filterType](tripPoints);
 
     switch (this.#currentSortType) {
       case SortType.DAY:
@@ -65,7 +69,7 @@ export default class ListPresenter {
   init() {
     /** Отрисовка компонента фильтрации */
     this.#renderFilters();
-
+    // render(this.#listComponent, this.#listContainer);
     /** Отрисовка всех компонентов путешествия */
     this.#renderList();
 
@@ -81,48 +85,15 @@ export default class ListPresenter {
   }
 
   #renderList() {
-
+    this.#renderSort();
+    render(this.#listComponent, this.#listContainer);
     if (this.#pointsTripModel.points.length === 0) {
       /** Если список событий пуст, то отрисовываем сообщение */
       this.#renderNoTripEventsComponent();
-
     } else {
-      /** Если список событий не пуст, то отрисовываем события */
-
-      /** Отрисовка компонента сортировки */
-      this.#renderSort();
-
       /** Рендерим список событий */
-      this.#renderAllTripEvents();
+      this.#renderAllTripEvents(this.tripPoints);
     }
-  }
-
-  #createTripEventDataList() {
-    const tripEventDataList = this.pointsTrip.map((point) => this.#tripEventData(point));
-    return tripEventDataList;
-  }
-
-  /** Елемент события путешествия */
-  #tripEventData(item) {
-    const destination = this.#destinationsModel.getDestinationById(item);
-    const tripOffers = this.#offersModel.getSelectedOffersByType(item.type, item.offers);
-    const tripAllOffers = this.#offersModel.getOffersByType(item.type);
-
-
-    const tripEventData = ({
-      id: item.id,
-      basePrice: item.base_price,
-      dateFrom: item.date_from,
-      dateTo: item.date_to,
-      destination: destination,
-      isFavorite: item.is_favorite,
-      offers: tripOffers,
-      allOffers: this.#offersModel.offers,
-      allOffersThisType: tripAllOffers,
-      allDestinations: this.#destinationsModel.destinations,
-      type: item.type,
-    });
-    return tripEventData;
   }
 
   #renderFilters() {
@@ -144,19 +115,6 @@ export default class ListPresenter {
   /** Парсер данных события путешествия из общего обьекта
    *  в формат данных сервера для pointsTripModel
   */
-  #parseData(data) {
-    const parseData = {
-      id: data.id,
-      'base_price': data.basePrice,
-      'date_from': data.dateFrom,
-      'date_to': data.dateTo,
-      destination: data.destination.id,
-      'is_favorite': data.isFavorite,
-      offers: data.offers,
-      type: data.type
-    };
-    return parseData;
-  }
 
   /**
    * Обработчик события изменения View (от вьюшек)
@@ -169,13 +127,13 @@ export default class ListPresenter {
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-        this.#pointsTripModel.updatePoint(updateType, this.#parseData(update));
+        this.#pointsTripModel.updatePoint(updateType, update);
         break;
       case UserAction.ADD_POINT:
-        this.#pointsTripModel.addPoint(updateType, this.#parseData(update));
+        this.#pointsTripModel.addPoint(updateType, update);
         break;
       case UserAction.DELETE_POINT:
-        this.#pointsTripModel.deletePoint(updateType, this.#parseData(update));
+        this.#pointsTripModel.deletePoint(updateType, update);
         break;
     }
   };
@@ -227,43 +185,35 @@ export default class ListPresenter {
 
 
   /** Создание события путешествия - презентер */
-  #renderTripPoint({ tripEventData, listContainer}) {
-
+  #renderTripPoint(tripPoint) {
     if (this.#noTripEventsComponent) {
       remove(this.#noTripEventsComponent);
     }
     const tripPointsPresenter = new TripPointsPresenter({
-
-      tripEventData,
-      listContainer,
+      pointListContainer: this.#listComponent.element,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
       onEventChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
     });
 
-    tripPointsPresenter.init(tripEventData);
+    tripPointsPresenter.init(tripPoint);
 
-    this.#tripPointsPresentersId.set(tripEventData.id, tripPointsPresenter);
+    this.#tripPointsPresentersId.set(tripPoint.id, tripPointsPresenter);
   }
 
   #renderNoTripEventsComponent() {
     this.#noTripEventsComponent = new MessageEventsView({
       filterType: this.#filterType,
     });
-    render(this.#noTripEventsComponent, this.#listContainer);
+    render(this.#noTripEventsComponent, this.#listComponent.element);
   }
 
 
   /** Создание списка событий путешествия */
-  #renderAllTripEvents() {
+  #renderAllTripEvents(tripPoints) {
     this.#renderNoTripEventsComponent();
-
-    this.#createTripEventDataList().forEach((eventData) =>{
-
-      this.#renderTripPoint({
-        tripEventData: eventData
-        , listContainer: this.#listContainer
-      });
-    });
+    tripPoints.forEach((tripPoint) => this.#renderTripPoint(tripPoint));
   }
 
   /** Очистка компонента с событиями путешествия */

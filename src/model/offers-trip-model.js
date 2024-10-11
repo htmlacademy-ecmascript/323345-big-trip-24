@@ -14,7 +14,9 @@ export default class OffersTripsModel {
   }
 
   getOffersByType(type) {
-    return this.#offers.find((offer) => offer.type === type).offers;
+    return this.#offers
+      .filter((offersItem) => offersItem.type === type)[0]
+      .offers;
   }
 
   getSelectedOffersByType(type, allOffers){

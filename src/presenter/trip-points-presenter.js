@@ -1,7 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
 import { UserAction, UpdateType } from '../const.js';
 
-import ListEventsView from '../view/list-events-view.js';
 import ItemListEventsView from '../view/item-list-events-view.js';
 import EditItemListEventsView from '../view/edit-item-list-events-view.js';
 
@@ -13,50 +12,53 @@ const Mode = {
 
 export default class TripPointsPresenter {
 
-  #listComponent = null;
-  #destinations = null;
-  #tripEventData = null;
-  #listContainer = null;
+  #pointListContainer = null;
+  #destinationsModel = null;
+  #offersModel = null;
+  #handleEventChange = null;
+
+  #tripPoint = null;
   #tripPointComponent = null;
   #tripPointEditComponent = null;
-  #handleEventChange = null;
   #mode = Mode.DEFAULT;
   #handleModeChange = null;
   constructor({
-    tripEventData
-    , listContainer
-    , onEventChange
-    , onModeChange
+    pointListContainer,
+    destinationsModel,
+    offersModel,
+    onEventChange,
+    onModeChange,
   }) {
-    this.#destinations = tripEventData.allDestinations;
-    this.#tripEventData = tripEventData;
-    this.#listContainer = listContainer;
+    this.#pointListContainer = pointListContainer;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#handleEventChange = onEventChange;
     this.#handleModeChange = onModeChange;
   }
 
-  init(tripEventData) {
+  init(tripPoint) {
+    this.#tripPoint = tripPoint;
 
-    this.#listComponent = new ListEventsView();
-    this.#tripEventData = tripEventData;
-    /** Рендерим список для новых событий */
-    render(this.#listComponent, this.#listContainer);
-
-    this.#createTripPointComponent();
+    this.#createTripPointComponent(tripPoint);
   }
 
-  #createTripPointComponent() {
+  #createTripPointComponent(tripPoint) {
     const prevTripPointComponent = this.#tripPointComponent;
     const prevTripPointEditComponent = this.#tripPointEditComponent;
 
-    this.#tripPointComponent = new ItemListEventsView(this.#tripEventData, {onEditClick: this.#onEditClick, onFavoriteClick: this.#handleFavoriteClick,});
+    this.#tripPointComponent = new ItemListEventsView({
+      tripPoint,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
+      onEditClick: this.#onEditClick,
+      onFavoriteClick: this.#handleFavoriteClick,
+    });
 
     /** Инициализируем компонент для редактирования события */
-    this.#createTripPointEditComponent() ;
+    this.#createTripPointEditComponent(tripPoint) ;
 
     if (prevTripPointComponent === null || prevTripPointEditComponent === null) {
-      render(this.#tripPointComponent, this.#listComponent.element);
-      return;
+      return render(this.#tripPointComponent, this.#pointListContainer);
     }
 
     if (this.#mode === Mode.DEFAULT) {
@@ -74,11 +76,13 @@ export default class TripPointsPresenter {
   /**
    * Создает компонент для редактирования события
    */
-  #createTripPointEditComponent() {
+  #createTripPointEditComponent(tripPoint) {
     this.#tripPointEditComponent = new EditItemListEventsView({
-      tripEventData: this.#tripEventData,
+      tripPoint,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
       onFormSubmit: this.#onSubmitForm,
-      onCloseFormClick: this.#onSubmitForm,
+      onCloseFormClick: this.#handleFormCloseClick,
       onDeleteClick: this.#handleDeleteClick,
     });
   }
@@ -94,7 +98,7 @@ export default class TripPointsPresenter {
    */
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#tripPointEditComponent.reset(this.#tripEventData);
+      this.#tripPointEditComponent.reset(this.#tripPoint);
       this.#replaceFormToCard();
     }
   }
@@ -106,7 +110,7 @@ export default class TripPointsPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#onSubmitForm(this.#tripEventData);
+      this.#replaceFormToCard();
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     }
   };
@@ -143,9 +147,9 @@ export default class TripPointsPresenter {
 
   #onSubmitForm = (update) => {
     const isMinorUpdate =
-      this.#tripEventData.dateFrom !== update.date_from ||
-      this.#tripEventData.dateTo !== update.date_to ||
-      this.#tripEventData.basePrice !== update.base_price;
+      this.#tripPoint.date_from !== update.date_from
+      || this.#tripPoint.date_to !== update.date_to
+      || this.#tripPoint.base_price !== update.base_price;
 
     this.#handleEventChange(
       UserAction.UPDATE_POINT,
@@ -159,14 +163,19 @@ export default class TripPointsPresenter {
     this.#handleEventChange(
       UserAction.UPDATE_POINT,
       UpdateType.MINOR,
-      {...this.#tripEventData, isFavorite: !this.#tripEventData.isFavorite});
+      {...this.#tripPoint, isFavorite: !this.#tripPoint.is_favorite}
+    );
   };
 
-  #handleDeleteClick = (tripEventData) => {
+  #handleFormCloseClick = () => {
+    this.#replaceFormToCard();
+  };
+
+  #handleDeleteClick = (tripPoint) => {
     this.#handleEventChange(
       UserAction.DELETE_POINT,
       UpdateType.MINOR,
-      tripEventData
+      tripPoint
     );
   };
 }

@@ -1,3 +1,4 @@
+import he from 'he';
 import { humanizeEventDate, getDuration } from '../utils/time.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
@@ -17,24 +18,15 @@ function createOffersTemplate(offers) {
     '';
 }
 
-
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-
-dayjs.extend(utc);
-// Mon, 21 Oct 2024 09:19:09 GMT
-
-function createItemListEventsTemplate(tripEventData) {
+function createItemListEventsTemplate(tripPoint, destination, offers) {
 
   const {
-    basePrice = tripEventData.basePrice
-    , dateFrom = new Date(tripEventData.dateFrom)
-    , dateTo = new Date(tripEventData.dateTo)
-    , destination = tripEventData.destination
-    , offers = tripEventData.offers
-    , type = tripEventData.basePrice
-    , isFavorite = tripEventData.isFavorite
-  } = tripEventData;
+    type,
+    date_from: dateFrom,
+    date_to: dateTo,
+    base_price: price,
+    is_favorite: isFavorite
+  } = tripPoint;
 
   const date = humanizeEventDate(dateFrom, 'date') ? humanizeEventDate(dateFrom, 'date') : '';
   const startTime = humanizeEventDate(dateFrom, 'time') ? humanizeEventDate(dateFrom, 'time') : '';
@@ -51,7 +43,7 @@ function createItemListEventsTemplate(tripEventData) {
                 <div class="event__type">
                   <img class="event__type-icon" width="42" height="42" src="./img/icons/${type}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${type} ${destination.name}</h3>
+                <h3 class="event__title">${type} ${destination ? he.encode(destination.name) : ''}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
                     <time class="event__start-time" datetime="${datetime}">${startTime}</time>
@@ -61,7 +53,7 @@ function createItemListEventsTemplate(tripEventData) {
                   <p class="event__duration">${getDuration(dateFrom, dateTo)}</p>
                 </div>
                 <p class="event__price">
-                  €&nbsp;<span class="event__price-value">${basePrice}</span>
+                  €&nbsp;<span class="event__price-value">${price}</span>
                 </p>
                 <h4 class="visually-hidden">Offers:</h4>
 
@@ -83,15 +75,32 @@ function createItemListEventsTemplate(tripEventData) {
 
 export default class ItemListEventsView extends AbstractView {
 
-  #tripEventData = null;
+  #tripPoint = null;
+  #destinationsModel = null;
+  #offersModel = null;
   #handleEditClick = null;
   #handleFavoriteClick = null;
 
-  constructor(tripEventData, {onEditClick, onFavoriteClick}) {
+  #destination = null;
+  #offers = null;
+
+  constructor({
+    tripPoint,
+    destinationsModel,
+    offersModel,
+    onEditClick,
+    onFavoriteClick,
+
+  }) {
     super();
-    this.#tripEventData = tripEventData;
+    this.#tripPoint = tripPoint;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#handleEditClick = onEditClick;
     this.#handleFavoriteClick = onFavoriteClick;
+
+    this.#destination = this.#destinationsModel.getDestinationById(tripPoint.destination);
+    this.#offers = this.#offersModel.getSelectedOffersByType(tripPoint.type, tripPoint.offers);
 
     this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#editClickHandler);
@@ -102,7 +111,7 @@ export default class ItemListEventsView extends AbstractView {
 
   get template() {
 
-    return createItemListEventsTemplate(this.#tripEventData);
+    return createItemListEventsTemplate(this.#tripPoint, this.#destination, this.#offers);
   }
 
   #editClickHandler = (evt) => {
