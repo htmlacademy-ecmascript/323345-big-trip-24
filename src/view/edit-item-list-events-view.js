@@ -190,6 +190,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
 
   #handleFormSubmit = null;
   #handleCloseFormClick = null;
+  #handleDeleteClick = null;
 
   #flatpickrDateFrom = null;
   #flatpickrDateTo = null;
@@ -198,6 +199,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       tripEventData
       , onFormSubmit
       , onCloseFormClick
+      , onDeleteClick
     }
   ) {
     super();
@@ -206,6 +208,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
 
     this.#handleFormSubmit = onFormSubmit;
     this.#handleCloseFormClick = onCloseFormClick;
+    this.#handleDeleteClick = onDeleteClick;
 
     /** Инициализирует стейт из начальных данных*/
     this._setState(EditItemListEventsView.parseTripEventDataToState({tripEventData: this.#tripEventData, allDestinations: this.#tripEventData.allDestinations}));
@@ -236,13 +239,19 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       .addEventListener('change', this.#offersChangeHandler);
 
     this.element.querySelector('.event__input.event__input--price')
-      .addEventListener('change', this.#priceChangeHandler);
+      .addEventListener('blur', (evt) => {
+        evt.stopPropagation();
+        this.#priceChangeHandler(evt);
+      });
 
     this.element.querySelector('.event__input.event__input--destination')
       .addEventListener('input', this.#destinationInputHandler);
 
     this.element.querySelector('.event__reset-btn')
       .addEventListener('click', this.#closeFormClickHandler);
+
+    this.element.querySelector('.event__reset-btn')
+      .addEventListener('click', this.#formDeleteClickHandler);
 
     this.#setFlatpickrTripEvent();
 
@@ -362,6 +371,11 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     this.#handleCloseFormClick(this.#tripEventData);
   };
 
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick({...this._state});
+  };
+
   /**
    * Ищет пункт назначения по названию сравнивая его с названиями
    *  пунктов назначения и закидывает выбранный в стейт
@@ -437,7 +451,8 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   }
 
   static parseStateToTripEventData(state) {
-
-    return {...state};
+    const tripEventData = { ...state };
+    tripEventData.offers = tripEventData.offers.map((offer) => offer.id);
+    return tripEventData;
   }
 }

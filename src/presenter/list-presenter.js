@@ -1,6 +1,5 @@
 import { render, remove } from '../framework/render.js';
-import { MESSAGE, SortType, FilterType, UpdateType, UserAction } from '../const.js';
-// import { generateFilter } from '../mock/filter.js';
+import { SortType, FilterType, UpdateType, UserAction } from '../const.js';
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/sort.js';
 import { filter } from '../utils/filter.js';
 
@@ -23,7 +22,7 @@ export default class ListPresenter {
   #filtersModel = null;
 
   #tripPointsPresentersId = new Map();
-  #noTripEventsComponent = new MessageEventsView(MESSAGE.EMPTY);
+  #noTripEventsComponent = null;
 
   #sortComponent = null;
   #currentSortType = SortType.DAY;
@@ -42,6 +41,7 @@ export default class ListPresenter {
     this.#offersModel = offersTripModel;
     this.#filtersModel = filtersModel;
 
+    /** Подписываемся на изменение данных модели и прокидываем callback */
     this.#pointsTripModel.addObserver(this.#handleModelEvent);
     this.#filtersModel.addObserver(this.#handleModelEvent);
   }
@@ -81,9 +81,9 @@ export default class ListPresenter {
 
   #renderList() {
 
-    if (this.pointsTrip.length === 0) {
+    if (this.#pointsTripModel.points.length === 0) {
       /** Если список событий пуст, то отрисовываем сообщение */
-      render(this.#noTripEventsComponent, this.#listContainer);
+      this.#renderNoTripEventsComponent();
 
     } else {
       /** Если список событий не пуст, то отрисовываем события */
@@ -122,7 +122,6 @@ export default class ListPresenter {
       allDestinations: this.#destinationsModel.destinations,
       type: item.type,
     });
-
     return tripEventData;
   }
 
@@ -141,9 +140,16 @@ export default class ListPresenter {
     this.#tripPointsPresentersId.forEach((presenter) => presenter.resetView());
   };
 
-  /** Обновление данных путешествия */
+  /**
+   * Обработчик события изменения View (от вьюшек)
+   * Принимает пользовательские данные от вьюшки и передает их в модель
+   * @param {UserAction} actionType - тип события (обновить/добавить/удалить)
+   * @param {UpdateType} updateType - тип обновления (patch/minor/major)
+   * @param {object} update - обновленные данные (объект с данными от вьюшки)
+   * @returns Отправляет обновленные данные в модель для обновленния
+   */
   #handleViewAction = (actionType, updateType, update) => {
-    const updateParse = {id: update.id, 'base_price': update.basePrice, 'date_from': update.dateFrom, 'date_to': update.dateTo, destination: update.destination, 'is_favorite': update.isFavorite, offers: update.offers, type: update.type};
+    const updateParse = {id: update.id, 'base_price': update.basePrice, 'date_from': update.dateFrom, 'date_to': update.dateTo, destination: update.destination.id, 'is_favorite': update.isFavorite, offers: update.offers, type: update.type};
 
     switch (actionType) {
       case UserAction.UPDATE_POINT:
@@ -158,11 +164,16 @@ export default class ListPresenter {
     }
   };
 
+  /**
+   * Обработчик события изменения данных модели
+   * @param {UpdateType} updateType - тип обновления (patch/minor/major)
+   * @param {object} data - обновленные данные
+   * @returns перерисовывает компоненты согласно типу обновления
+   */
   #handleModelEvent = (updateType, data) => {
-    const dataParse = {id: data.id, 'base_price': data.basePrice, 'date_from': data.dateFrom, 'date_to': data.dateTo, destination: data.destination, 'is_favorite': data.isFavorite, offers: data.offers, type: data.type};
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#tripPointsPresentersId.get(dataParse.id).init(dataParse);
+        this.#tripPointsPresentersId.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
         this.#clearTripPointList();
@@ -198,7 +209,7 @@ export default class ListPresenter {
   /** Перерисовывает события согласно типу сортировки
   * @param {string} sortType - тип сортировки
   * @run Отрисовку всех событий путешествия согласно типу сортировки
-  * */
+  */
   #handleSortTypeChange = (sortType) => {
     if (this.#currentSortType === sortType) {
       return;
@@ -212,6 +223,9 @@ export default class ListPresenter {
   /** Создание события путешествия - презентер */
   #renderTripPoint({ tripEventData, listContainer}) {
 
+    if (this.#noTripEventsComponent) {
+      remove(this.#noTripEventsComponent);
+    }
     const tripPointsPresenter = new TripPointsPresenter({
 
       tripEventData,
@@ -225,9 +239,17 @@ export default class ListPresenter {
     this.#tripPointsPresentersId.set(tripEventData.id, tripPointsPresenter);
   }
 
+  #renderNoTripEventsComponent() {
+    this.#noTripEventsComponent = new MessageEventsView({
+      filterType: this.#filterType,
+    });
+    render(this.#noTripEventsComponent, this.#listContainer);
+  }
+
 
   /** Создание списка событий путешествия */
   #renderAllTripEvents() {
+    this.#renderNoTripEventsComponent();
 
     this.#createTripEventDataList().forEach((eventData) =>{
 

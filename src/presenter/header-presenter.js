@@ -29,6 +29,19 @@ export default class HeaderPresenter {
   #renderTripHeader() {
     render(new HeaderTripInfoView({allDestinations: this.#destinations , tripEventDataList: this.#tripEventDataList}), tripMain, RenderPosition.AFTERBEGIN); // Заголовок, даты, общая цена
 
-    render(new ButtonAddNewEventView(), tripMain); // Заголовок, кнопка добавить событие
+    // render(new ButtonAddNewEventView(), tripMain); // Заголовок, кнопка добавить событие
   }
+
+  // #renderButtonAddNewEvent() {
+
+  //   const ButtonAddNewEventComponent = new ButtonAddNewEventView({
+  //     onClick: handleNewTripPointButtonClick
+  //   });
+
+  //   function handleNewTripPointButtonClick() {
+  //     listPresenter.pointsTrip();
+  //     ButtonAddNewEventComponent.element.disabled = true;
+  //   }
+  // }
 }
+

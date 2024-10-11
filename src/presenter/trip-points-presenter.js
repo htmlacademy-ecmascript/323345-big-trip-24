@@ -76,9 +76,10 @@ export default class TripPointsPresenter {
    */
   #createTripPointEditComponent() {
     this.#tripPointEditComponent = new EditItemListEventsView({
-      tripEventData: this.#tripEventData
-      , onFormSubmit: this.#onSubmitForm
-      , onCloseFormClick: this.#onSubmitForm
+      tripEventData: this.#tripEventData,
+      onFormSubmit: this.#onSubmitForm,
+      onCloseFormClick: this.#onSubmitForm,
+      onDeleteClick: this.#handleDeleteClick,
     });
   }
 
@@ -140,11 +141,17 @@ export default class TripPointsPresenter {
     this.#replaceCardToForm();
   };
 
-  #onSubmitForm = (tripEventData) => {
+  #onSubmitForm = (update) => {
+    const isMinorUpdate =
+      this.#tripEventData.dateFrom !== update.date_from ||
+      this.#tripEventData.dateTo !== update.date_to ||
+      this.#tripEventData.basePrice !== update.base_price;
+
     this.#handleEventChange(
       UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
-      tripEventData);
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      update,
+    );
     this.#replaceFormToCard();
   };
 
@@ -153,5 +160,13 @@ export default class TripPointsPresenter {
       UserAction.UPDATE_POINT,
       UpdateType.MINOR,
       {...this.#tripEventData, isFavorite: !this.#tripEventData.isFavorite});
+  };
+
+  #handleDeleteClick = (tripEventData) => {
+    this.#handleEventChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      tripEventData
+    );
   };
 }

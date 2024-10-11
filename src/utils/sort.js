@@ -2,11 +2,11 @@ import dayjs from 'dayjs';
 
 function sortEventsByDay (eventA, eventB) {
 
-  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventB.dateFrom)) < 0) {
+  if (dayjs.utc(eventA.date_from).diff(dayjs.utc(eventB.date_from)) < 0) {
     return -1;
   }
 
-  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventB.dateFrom)) > 0) {
+  if (dayjs.utc(eventA.date_from).diff(dayjs.utc(eventB.date_from)) > 0) {
     return 1;
   }
 
@@ -15,13 +15,13 @@ function sortEventsByDay (eventA, eventB) {
 
 function sortEventsByTime (eventA, eventB) {
 
-  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventA.dateTo)) <
-      dayjs.utc(eventB.dateFrom).diff(dayjs.utc(eventB.dateTo))) {
+  if (dayjs.utc(eventA.date_from).diff(dayjs.utc(eventA.date_to)) <
+      dayjs.utc(eventB.date_from).diff(dayjs.utc(eventB.date_to))) {
     return -1;
   }
 
-  if (dayjs.utc(eventA.dateFrom).diff(dayjs.utc(eventA.dateTo)) >
-      dayjs.utc(eventB.dateFrom).diff(dayjs.utc(eventB.dateTo))) {
+  if (dayjs.utc(eventA.date_from).diff(dayjs.utc(eventA.date_to)) >
+      dayjs.utc(eventB.date_from).diff(dayjs.utc(eventB.date_to))) {
     return 1;
   }
 
@@ -30,11 +30,11 @@ function sortEventsByTime (eventA, eventB) {
 
 function sortEventsByPrice (eventA, eventB) {
 
-  if (eventA.basePrice > eventB.basePrice) {
+  if (eventA.base_price > eventB.base_price) {
     return -1;
   }
 
-  if (eventA.basePrice < eventB.basePrice) {
+  if (eventA.base_price < eventB.base_price) {
     return 1;
   }
 

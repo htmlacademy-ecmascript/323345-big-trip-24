@@ -19,11 +19,8 @@ export default class PointsTripModel extends Observable {
       throw new Error('Can\'t update unexisting point');
     }
 
-    this.#dataPoints = [
-      ...this.#dataPoints.slice(0, index),
-      update,
-      ...this.#dataPoints.slice(index + 1)
-    ];
+    this.#dataPoints = this.#dataPoints.map(
+      (item) => (item.id === update.id ? update : item));
 
     this._notify(updateType, update);
   }
