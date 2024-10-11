@@ -7,7 +7,6 @@ import FiltersPresenter from './filters-presenter.js';
 import MessageEventsView from '../view/message-events-view.js';
 import SortEventsView from '../view/sort-events-view.js';
 
-import HeaderPresenter from './header-presenter.js';
 import TripPointsPresenter from './trip-points-presenter.js';
 
 const tripFiltersElement = document.querySelector('.trip-controls__filters');
@@ -29,11 +28,11 @@ export default class ListPresenter {
   #filterType = FilterType.EVERYTHING;
 
   constructor({
-    listContainer
-    , pointsTripModel
-    , destinationsTripModel
-    , offersTripModel
-    , filtersModel
+    listContainer,
+    pointsTripModel,
+    destinationsTripModel,
+    offersTripModel,
+    filtersModel,
   }) {
     this.#listContainer = listContainer;
     this.#pointsTripModel = pointsTripModel;
@@ -64,19 +63,21 @@ export default class ListPresenter {
   }
 
   init() {
-
-    /** Передаем данные в презентер шапки */
-    this.#headerPresenter({
-      destinations:this.#destinationsModel
-      , tripEventDataList: this.#createTripEventDataList()
-    });
-
     /** Отрисовка компонента фильтрации */
     this.#renderFilters();
 
     /** Отрисовка всех компонентов путешествия */
     this.#renderList();
 
+  }
+
+  createTripPoint() {
+    this.#currentSortType = SortType.DAY;
+    this.#filtersModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+
+    if (this.#noTripEventsComponent) {
+      remove(this.#noTripEventsComponent);
+    }
   }
 
   #renderList() {
@@ -97,7 +98,6 @@ export default class ListPresenter {
   }
 
   #createTripEventDataList() {
-
     const tripEventDataList = this.pointsTrip.map((point) => this.#tripEventData(point));
     return tripEventDataList;
   }
@@ -140,6 +140,24 @@ export default class ListPresenter {
     this.#tripPointsPresentersId.forEach((presenter) => presenter.resetView());
   };
 
+
+  /** Парсер данных события путешествия из общего обьекта
+   *  в формат данных сервера для pointsTripModel
+  */
+  #parseData(data) {
+    const parseData = {
+      id: data.id,
+      'base_price': data.basePrice,
+      'date_from': data.dateFrom,
+      'date_to': data.dateTo,
+      destination: data.destination.id,
+      'is_favorite': data.isFavorite,
+      offers: data.offers,
+      type: data.type
+    };
+    return parseData;
+  }
+
   /**
    * Обработчик события изменения View (от вьюшек)
    * Принимает пользовательские данные от вьюшки и передает их в модель
@@ -149,17 +167,15 @@ export default class ListPresenter {
    * @returns Отправляет обновленные данные в модель для обновленния
    */
   #handleViewAction = (actionType, updateType, update) => {
-    const updateParse = {id: update.id, 'base_price': update.basePrice, 'date_from': update.dateFrom, 'date_to': update.dateTo, destination: update.destination.id, 'is_favorite': update.isFavorite, offers: update.offers, type: update.type};
-
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-        this.#pointsTripModel.updatePoint(updateType, updateParse);
+        this.#pointsTripModel.updatePoint(updateType, this.#parseData(update));
         break;
       case UserAction.ADD_POINT:
-        this.#pointsTripModel.addPoint(updateType, updateParse);
+        this.#pointsTripModel.addPoint(updateType, this.#parseData(update));
         break;
       case UserAction.DELETE_POINT:
-        this.#pointsTripModel.deletePoint(updateType, updateParse);
+        this.#pointsTripModel.deletePoint(updateType, this.#parseData(update));
         break;
     }
   };
@@ -185,16 +201,6 @@ export default class ListPresenter {
         break;
     }
   };
-
-  #headerPresenter({destinations, tripEventDataList, sourcedTripPoints}) {
-
-    const headerPresenter = new HeaderPresenter({
-      destinations
-      , tripEventDataList
-      , sourcedTripPoints
-    });
-    return headerPresenter.init();
-  }
 
   /** Отрисовка кнопок cортировки событий путешествия */
   #renderSort() {
