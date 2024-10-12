@@ -1,13 +1,13 @@
 import { nanoid } from 'nanoid';
 
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { UserAction, UpdateType } from '../const.js';
-import TripPointEditView from '../view/edit-item-list-events-view.js';
+import { UserAction, UpdateType, EMPTY_POINT } from '../const.js';
+import EditItemListEventsView from '../view/edit-item-list-events-view.js';
 
 
 export default class NewTripPointPresenter {
 
-  #listComponentContainer = null;
+  #pointComponentContainer = null;
   #handleDataChange = null;
   #handleDestroy = null;
 
@@ -16,8 +16,14 @@ export default class NewTripPointPresenter {
   #destinationsModel = null;
   #offersModel = null;
 
-  constructor({ listComponentContainer, onDataChange, onDestroy, destinationsModel, offersModel }) {
-    this.#listComponentContainer = listComponentContainer;
+  constructor({
+    tripPointListContainer,
+    onDataChange,
+    onDestroy,
+    destinationsModel,
+    offersModel,
+  }) {
+    this.#pointComponentContainer = tripPointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
     this.#destinationsModel = destinationsModel;
@@ -29,15 +35,16 @@ export default class NewTripPointPresenter {
       return;
     }
 
-    this.#tripPointEditComponent = new TripPointEditView({
-      tripEventData: null,
+    this.#tripPointEditComponent = new EditItemListEventsView({
+      tripPoint: EMPTY_POINT,
       destinationsModel: this.#destinationsModel,
       offersModel: this.#offersModel,
       onFormSubmit: this.#handleFormSubmit,
-      onDeleteClick: this.#handleDeleteClick
+      onDeleteClick: this.#handleDeleteClick,
+      onCloseFormClick: this.#handleFormCloseClick,
     });
 
-    render(this.#tripPointEditComponent, this.#listComponentContainer, RenderPosition.AFTERBEGIN);
+    render(this.#tripPointEditComponent, this.#pointComponentContainer, RenderPosition.AFTERBEGIN);
 
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }
@@ -56,6 +63,7 @@ export default class NewTripPointPresenter {
   }
 
   #handleFormSubmit = (tripPoint) => {
+
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.MINOR,
@@ -74,5 +82,9 @@ export default class NewTripPointPresenter {
       evt.preventDefault();
       this.destroy();
     }
+  };
+
+  #handleFormCloseClick = () => {
+    this.destroy();
   };
 }

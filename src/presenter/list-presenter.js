@@ -7,6 +7,7 @@ import FiltersPresenter from './filters-presenter.js';
 import MessageEventsView from '../view/message-events-view.js';
 import SortEventsView from '../view/sort-events-view.js';
 import ListEventsView from '../view/list-events-view.js';
+import NewTripPointPresenter from './new-trip-points-presenter.js';
 
 import TripPointsPresenter from './trip-points-presenter.js';
 
@@ -22,8 +23,10 @@ export default class ListPresenter {
   #filtersModel = null;
 
   #tripPointsPresentersId = new Map();
+  #newTripPointPresenter = null;
+
   #noTripEventsComponent = null;
-  #listComponent = null;
+  #listComponent = new ListEventsView();
 
   #sortComponent = null;
   #currentSortType = SortType.DAY;
@@ -35,6 +38,7 @@ export default class ListPresenter {
     destinationsTripModel,
     offersTripModel,
     filtersModel,
+    onNewTripPointClose
   }) {
     this.#listContainer = listContainer;
     this.#pointsTripModel = pointsTripModel;
@@ -42,7 +46,15 @@ export default class ListPresenter {
     this.#offersModel = offersTripModel;
     this.#filtersModel = filtersModel;
 
-    this.#listComponent = new ListEventsView();
+
+    this.#newTripPointPresenter = new NewTripPointPresenter({
+      tripPointListContainer: this.#listComponent.element,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
+      onDataChange: this.#handleViewAction,
+      onDestroy: onNewTripPointClose,
+    });
+
 
     /** Подписываемся на изменение данных модели и прокидываем callback */
     this.#pointsTripModel.addObserver(this.#handleModelEvent);
@@ -82,6 +94,7 @@ export default class ListPresenter {
     if (this.#noTripEventsComponent) {
       remove(this.#noTripEventsComponent);
     }
+    this.#newTripPointPresenter.init();
   }
 
   #renderList() {
@@ -110,11 +123,6 @@ export default class ListPresenter {
   #handleModeChange = () => {
     this.#tripPointsPresentersId.forEach((presenter) => presenter.resetView());
   };
-
-
-  /** Парсер данных события путешествия из общего обьекта
-   *  в формат данных сервера для pointsTripModel
-  */
 
   /**
    * Обработчик события изменения View (от вьюшек)
@@ -145,6 +153,7 @@ export default class ListPresenter {
    * @returns перерисовывает компоненты согласно типу обновления
    */
   #handleModelEvent = (updateType, data) => {
+
     switch (updateType) {
       case UpdateType.PATCH:
         this.#tripPointsPresentersId.get(data.id).init(data);
@@ -154,7 +163,7 @@ export default class ListPresenter {
         this.#renderList();
         break;
       case UpdateType.MAJOR:
-        this.#clearTripPointList({ resetSortType: true });
+        this.#clearTripPointList({ resetRenderedTripPointsCount: true, resetSortType: true });
         this.#renderList();
         break;
     }
@@ -193,7 +202,7 @@ export default class ListPresenter {
       pointListContainer: this.#listComponent.element,
       destinationsModel: this.#destinationsModel,
       offersModel: this.#offersModel,
-      onEventChange: this.#handleViewAction,
+      onDataChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
     });
 
@@ -219,6 +228,7 @@ export default class ListPresenter {
   /** Очистка компонента с событиями путешествия */
   #clearTripPointList({ resetSortType = false } = {}) {
 
+    this.#newTripPointPresenter.destroy();
     this.#tripPointsPresentersId.forEach((presenter) => presenter.destroy());
     this.#tripPointsPresentersId.clear();
 

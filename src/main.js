@@ -27,6 +27,7 @@ const listPresenter = new ListPresenter({
   destinationsTripModel,
   offersTripModel,
   filtersModel,
+  onNewTripPointClose: handleNewTripPointFormClose
 });
 
 
@@ -40,6 +41,10 @@ const headerPresenter = new HeaderPresenter({
 const buttonAddNewEventComponent = new ButtonAddNewEventView({
   onClick: handleButtonNewPointClick
 });
+
+function handleNewTripPointFormClose() {
+  buttonAddNewEventComponent.element.disabled = false;
+}
 
 function handleButtonNewPointClick() {
   listPresenter.createTripPoint();

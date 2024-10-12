@@ -9,6 +9,16 @@ const EVENT_TYPES = [
   , 'sightseeing'
   , 'restaurant'];
 
+const EMPTY_POINT = {
+  'base_price': 0,
+  'date_from': '',
+  'date_to': '',
+  'destination': '',
+  'is_favorite': false,
+  'offers': [],
+  'type': 'flight'
+};
+
 const FilterType = {
   EVERYTHING: 'everything',
   FUTURE: 'future',
@@ -40,6 +50,7 @@ const DisabledSortType = [SortType.EVENT, SortType.OFFERS];
 
 export {
   EVENT_TYPES,
+  EMPTY_POINT,
   FilterType,
   SortType,
   UserAction,

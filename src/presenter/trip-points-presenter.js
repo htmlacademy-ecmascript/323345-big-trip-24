@@ -15,7 +15,7 @@ export default class TripPointsPresenter {
   #pointListContainer = null;
   #destinationsModel = null;
   #offersModel = null;
-  #handleEventChange = null;
+  #handleDataChange = null;
 
   #tripPoint = null;
   #tripPointComponent = null;
@@ -26,13 +26,13 @@ export default class TripPointsPresenter {
     pointListContainer,
     destinationsModel,
     offersModel,
-    onEventChange,
+    onDataChange,
     onModeChange,
   }) {
     this.#pointListContainer = pointListContainer;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
-    this.#handleEventChange = onEventChange;
+    this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
 
@@ -81,9 +81,9 @@ export default class TripPointsPresenter {
       tripPoint,
       destinationsModel: this.#destinationsModel,
       offersModel: this.#offersModel,
-      onFormSubmit: this.#onSubmitForm,
-      onCloseFormClick: this.#handleFormCloseClick,
+      onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleDeleteClick,
+      onCloseFormClick: this.#handleFormCloseClick,
     });
   }
 
@@ -145,13 +145,13 @@ export default class TripPointsPresenter {
     this.#replaceCardToForm();
   };
 
-  #onSubmitForm = (update) => {
+  #handleFormSubmit = (update) => {
     const isMinorUpdate =
       this.#tripPoint.date_from !== update.date_from
       || this.#tripPoint.date_to !== update.date_to
       || this.#tripPoint.base_price !== update.base_price;
 
-    this.#handleEventChange(
+    this.#handleDataChange(
       UserAction.UPDATE_POINT,
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update,
@@ -160,10 +160,10 @@ export default class TripPointsPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#handleEventChange(
+    this.#handleDataChange(
       UserAction.UPDATE_POINT,
       UpdateType.MINOR,
-      {...this.#tripPoint, isFavorite: !this.#tripPoint.is_favorite}
+      {...this.#tripPoint, 'is_favorite': !this.#tripPoint.is_favorite}
     );
   };
 
@@ -172,7 +172,7 @@ export default class TripPointsPresenter {
   };
 
   #handleDeleteClick = (tripPoint) => {
-    this.#handleEventChange(
+    this.#handleDataChange(
       UserAction.DELETE_POINT,
       UpdateType.MINOR,
       tripPoint

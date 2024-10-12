@@ -174,7 +174,6 @@ function createEditItemListEventsTemplate(tripPoint, destinationNames) {
 
 export default class EditItemListEventsView extends AbstractStatefulView {
 
-  #tripPoint = null;
   #destinationsModel = null;
   #offersModel = null;
   #handleFormSubmit = null;
@@ -199,7 +198,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
   ) {
     super();
-    this.#tripPoint = tripPoint;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
     this.#handleFormSubmit = onFormSubmit;
@@ -240,10 +238,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       ?.addEventListener('change', this.#offersChangeHandler);
 
     this.element.querySelector('.event__input.event__input--price')
-      .addEventListener('blur', (evt) => {
-        evt.stopPropagation();
-        this.#priceChangeHandler(evt);
-      });
+      .addEventListener('change', this.#priceChangeHandler);
 
     this.element.querySelector('.event__input.event__input--destination')
       .addEventListener('input', this.#destinationInputHandler);
@@ -356,20 +351,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   };
 
   /**
-	 * Сохраняет выбранные данные из стейта в реальные данные
-	 * @param {evt} event событие на кнопке сохранения
-	 */
-  #formSubmitHandler = (evt) => {
-    evt.preventDefault();
-
-    if (this.#hasEmptyFormFields()) {
-      return;
-    }
-
-    this.#handleFormSubmit(EditItemListEventsView.parseStateToTripPoint(this._state));
-  };
-
-  /**
    * Закрывает и сбрасывает стейт до начального.
    * @param {evt} event событие на кнопке закрытия
    */
@@ -414,6 +395,20 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   }
 
   /**
+	 * Сохраняет выбранные данные из стейта в реальные данные
+	 * @param {evt} event событие на кнопке сохранения
+	 */
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+
+    if (this.#hasEmptyFormFields()) {
+      return;
+    }
+
+    this.#handleFormSubmit(EditItemListEventsView.parseStateToTripPoint(this._state));
+  };
+
+  /**
    *  Настройки календаря для flatpickr
    * enableTime: true - включает ввод времени
    * dateFormat: 'd/m/y H:i' - формат даты
@@ -436,8 +431,8 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       enableTime: true,
       'time_24hr': true,
       dateFormat: 'd/m/y H:i',
-      defaultDate: humanizeEventDate(this._state.dateTo, 'eventTime'),
-      minDate: humanizeEventDate(this._state.dateFrom, 'eventTime'),
+      defaultDate: humanizeEventDate(this._state.date_to, 'eventTime'),
+      minDate: humanizeEventDate(this._state.date_from, 'eventTime'),
       onClose: this.#dateChangeHandler,
     });
   }
@@ -448,15 +443,15 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    * @param {*} dateStr Строка, представляющая выбранную дату или диапазон дат в формате, заданном в настройках плагина.
    * @param {*} instance Объект, представляющий текущий экземпляр плагина flatpickr.
    */
-  #dateChangeHandler = ([selectedDates], dateStr, instance) => {
+  #dateChangeHandler = (selectedDates, dateStr, instance) => {
     // dateStr default value this library
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
-        dateFrom: getUtcTimeFromLocal(selectedDates)
+        'date_from': getUtcTimeFromLocal(selectedDates)
       });
     } else if (instance === this.#flatpickrDateTo) {
       this.updateElement({
-        dateTo: getUtcTimeFromLocal(selectedDates)
+        'date_to': getUtcTimeFromLocal(selectedDates)
       });
     }
 
