@@ -55,7 +55,7 @@ export default class TripPointsPresenter {
     });
 
     /** Инициализируем компонент для редактирования события */
-    this.#createTripPointEditComponent(tripPoint) ;
+    this.#createTripPointEditComponent(tripPoint);
 
     if (prevTripPointComponent === null || prevTripPointEditComponent === null) {
       return render(this.#tripPointComponent, this.#pointListContainer);
@@ -121,11 +121,11 @@ export default class TripPointsPresenter {
    *  в начальные данные (сохраняет изменения)
    */
   #replaceCardToForm() {
-
     replace(this.#tripPointEditComponent, this.#tripPointComponent);
+    this.#tripPointEditComponent.reset(this.#tripPoint);
 
-    document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#handleModeChange();
+    document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.EDITING;
   }
 
@@ -134,7 +134,6 @@ export default class TripPointsPresenter {
    * Сбрасывает стейт редактируемого компонента
    */
   #replaceFormToCard() {
-
     replace(this.#tripPointComponent, this.#tripPointEditComponent);
 
     document.removeEventListener('keydown', this.#escKeyDownHandler);

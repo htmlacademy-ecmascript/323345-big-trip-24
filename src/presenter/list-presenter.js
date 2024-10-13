@@ -121,6 +121,7 @@ export default class ListPresenter {
 
   /** Обновление компонента с событиями путешествия */
   #handleModeChange = () => {
+    this.#newTripPointPresenter.destroy();
     this.#tripPointsPresentersId.forEach((presenter) => presenter.resetView());
   };
 

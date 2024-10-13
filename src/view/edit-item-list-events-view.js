@@ -255,7 +255,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    * @param {object} tripEventData начальные данные
    */
   reset(tripPoint) {
-    const destination = this.#destinationsModel.getDestinationInfoById(tripPoint.destination);
+    const destination = this.#destinationsModel.getDestinationById(tripPoint.destination);
     const offers = this.#offersModel.getSelectedOffersByType(tripPoint.type, tripPoint.offers);
     const allOffers = this.#offersModel.getOffersByType(tripPoint.type);
 
