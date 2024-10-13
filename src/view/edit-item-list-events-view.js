@@ -1,13 +1,13 @@
+import flatpickr from 'flatpickr';
+import he from 'he';
+
 import {EVENT_TYPES} from '../const.js';
 import { capitalizeFirstLetter } from '../utils/utils.js';
 import { humanizeEventDate, getUtcTimeFromLocal } from '../utils/time.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import flatpickr from 'flatpickr';
 
 
-function createOffersTemplate(tripEventData) {
-
-  const {allOffersThisType = tripEventData.offers, selectedOffers = tripEventData.offers} = tripEventData;
+function createOffersTemplate(offers, allOffers) {
 
   return (`
       <section class="event__section  event__section--offers">
@@ -15,11 +15,11 @@ function createOffersTemplate(tripEventData) {
         <div class="event__available-offers">
 
         ${
-    allOffersThisType.length > 0
-      ? allOffersThisType.map((offer) =>
+    allOffers.length > 0
+      ? allOffers.map((offer) =>
         (`
           <div class="event__offer-selector">
-            <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="${offer.title}" ${selectedOffers.includes(offer) && 'checked'}>
+            <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="${offer.title}" ${offers.includes(offer) && 'checked'}>
             <label class="event__offer-label" for="${offer.id}">
               <span class="event__offer-title">${offer.title}</span>
                 &plus;&euro;&nbsp;
@@ -36,10 +36,7 @@ function createOffersTemplate(tripEventData) {
     `);
 }
 
-
-function createDestinationSectionTemplate(destinations) {
-
-  const {description = destinations.description, pictures = destinations.pictures} = destinations;
+function createDestinationSectionTemplate({ description, pictures }) {
 
   return (
     description || pictures.length > 0
@@ -53,7 +50,7 @@ function createDestinationSectionTemplate(destinations) {
           : ''
         }
 
-          ${pictures.length > 0
+        ${pictures.length > 0
           ? (`<div class="event__photos-container">
               <div class="event__photos-tape">
                 ${pictures.map((picture) => (`
@@ -99,28 +96,17 @@ function createEventTypeList({checkedType}) {
   `);
 }
 
-function destinationsList(tripEventData) {
-  const {allDestinations} = tripEventData;
-
-  return (`
-    <datalist id="destination-list-1">
-     ${allDestinations.map((destination) => (`
-      <option value="${destination.name}">${destination.name}</option>
-    `)).join('')}
-    </datalist>
-  `);
-}
-
-function createEditItemListEventsTemplate(tripEventData) {
+function createEditItemListEventsTemplate(tripPoint, destinationNames) {
 
   const {
-
-    basePrice
-    , dateFrom = new Date(tripEventData.dateFrom)
-    , dateTo = new Date(tripEventData.dateTo)
-    , destination = tripEventData.destination[0]
-    , type
-  } = tripEventData;
+    type,
+    date_from: dateFrom,
+    date_to: dateTo,
+    base_price: price,
+    destination,
+    offers,
+    allOffers
+  } = tripPoint;
   const timeStart = humanizeEventDate(dateFrom, 'eventTime') ? humanizeEventDate(dateFrom, 'eventTime') : '';
   const timeEnd = humanizeEventDate(dateTo, 'eventTime') ? humanizeEventDate(dateTo, 'eventTime') : '';
 
@@ -142,9 +128,13 @@ function createEditItemListEventsTemplate(tripEventData) {
             <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? he.encode(destination.name) : ''}" list="destination-list-1">
 
-              ${destinationsList(tripEventData)}
+            <datalist id="destination-list-1">
+              ${destinationNames.map((destinationName) => (`
+                <option value="${destinationName}"></option>
+              `)).join('')}
+            </datalist>
 
           </div>
 
@@ -161,7 +151,7 @@ function createEditItemListEventsTemplate(tripEventData) {
               <span class="visually-hidden">Price</span>
               €
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -172,9 +162,9 @@ function createEditItemListEventsTemplate(tripEventData) {
         </header>
         <section class="event__details">
 
-          ${createOffersTemplate(tripEventData)}
+          ${allOffers.length > 0 ? createOffersTemplate(offers, allOffers) : ''}
 
-          ${createDestinationSectionTemplate(destination)}
+          ${destination ? createDestinationSectionTemplate(destination) : ''}
 
         </section>
       </form>
@@ -184,37 +174,50 @@ function createEditItemListEventsTemplate(tripEventData) {
 
 export default class EditItemListEventsView extends AbstractStatefulView {
 
-  #tripEventData = null;
-
-
+  #destinationsModel = null;
+  #offersModel = null;
   #handleFormSubmit = null;
   #handleCloseFormClick = null;
+  #handleDeleteClick = null;
+
+  #destination = null;
+  #offers = null;
+  #allOffers = null;
+  #destinationNames = null;
 
   #flatpickrDateFrom = null;
   #flatpickrDateTo = null;
   constructor(
     {
-      tripEventData
-      , onFormSubmit
-      , onCloseFormClick
+      tripPoint,
+      destinationsModel,
+      offersModel,
+      onFormSubmit,
+      onCloseFormClick,
+      onDeleteClick,
     }
   ) {
     super();
-    this.#tripEventData = tripEventData;
-
-
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleCloseFormClick = onCloseFormClick;
+    this.#handleDeleteClick = onDeleteClick;
+
+    this.#destination = this.#destinationsModel.getDestinationById(tripPoint.destination);
+    this.#offers = this.#offersModel.getSelectedOffersByType(tripPoint.type, tripPoint.offers);
+    this.#allOffers = this.#offersModel.getOffersByType(tripPoint.type);
+    this.#destinationNames = this.#destinationsModel.getDestinationNames();
 
     /** Инициализирует стейт из начальных данных*/
-    this._setState(EditItemListEventsView.parseTripEventDataToState({tripEventData: this.#tripEventData, allDestinations: this.#tripEventData.allDestinations}));
+    this._setState(EditItemListEventsView.parseTripPointToState(tripPoint, this.#destination, this.#offers, this.#allOffers));
 
     this._restoreHandlers();
   }
 
   get template() {
 
-    return createEditItemListEventsTemplate(this._state);
+    return createEditItemListEventsTemplate(this._state, this.#destinationNames);
   }
 
   /**
@@ -232,7 +235,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       .addEventListener('change', this.#eventTypeChangeHandler);
 
     this.element.querySelector('.event__available-offers')
-      .addEventListener('change', this.#offersChangeHandler);
+      ?.addEventListener('change', this.#offersChangeHandler);
 
     this.element.querySelector('.event__input.event__input--price')
       .addEventListener('change', this.#priceChangeHandler);
@@ -241,7 +244,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       .addEventListener('input', this.#destinationInputHandler);
 
     this.element.querySelector('.event__reset-btn')
-      .addEventListener('click', this.#closeFormClickHandler);
+      .addEventListener('click', this.#formDeleteClickHandler);
 
     this.#setFlatpickrTripEvent();
 
@@ -251,8 +254,14 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    * Сбрасывает стейт до начальных данных
    * @param {object} tripEventData начальные данные
    */
-  reset(tripEventData) {
-    this.updateElement(tripEventData);
+  reset(tripPoint) {
+    const destination = this.#destinationsModel.getDestinationById(tripPoint.destination);
+    const offers = this.#offersModel.getSelectedOffersByType(tripPoint.type, tripPoint.offers);
+    const allOffers = this.#offersModel.getOffersByType(tripPoint.type);
+
+    this.updateElement(
+      EditItemListEventsView.parseTripPointToState(tripPoint, destination, offers, allOffers)
+    );
   }
 
   /**
@@ -286,7 +295,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
 
     let offers = this._state.offers;
 
-    const selectedOffer = this._state.allOffersThisType.find((offer) => offer.id === evt.target.id);
+    const selectedOffer = this._state.allOffers.find((offer) => offer.id === evt.target.id);
     const isActive = this._state.offers.some((offer) => offer.id === evt.target.id);
 
     if (isActive) {
@@ -313,11 +322,11 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       return;
     }
 
-    const allOffersThisType = this.#tripEventData.allOffers.find((offer) => offer.type === evt.target.value).offers;
+    const allOffers = this.#offersModel.getOffersByType(evt.target.value);
 
     this.updateElement({
       type: evt.target.value
-      , allOffersThisType
+      , allOffers
       , offers: []
     });
   };
@@ -337,18 +346,8 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
 
     this.updateElement({
-      basePrice: EventPrice,
+      'base_price': EventPrice,
     });
-  };
-
-  /**
-	 * Сохраняет выбранные данные из стейта в реальные данные
-	 * @param {evt} event событие на кнопке сохранения
-	 */
-  #formSubmitHandler = (evt) => {
-    evt.preventDefault();
-
-    this.#handleFormSubmit(EditItemListEventsView.parseStateToTripEventData(this._state));
   };
 
   /**
@@ -358,7 +357,12 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   #closeFormClickHandler = (evt) => {
     evt.preventDefault();
 
-    this.#handleCloseFormClick(this.#tripEventData);
+    this.#handleCloseFormClick();
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(EditItemListEventsView.parseStateToTripPoint(this._state));
   };
 
   /**
@@ -370,14 +374,38 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   #destinationInputHandler = (evt) => {
     evt.preventDefault();
 
-    const destination = this.#tripEventData.allDestinations.find((destinationItem) => (destinationItem.name === evt.target.value));
+    if (!this.#destinationsModel.getDestinationNames().includes(evt.target.value)) {
+      return;
+    }
 
-    if (this.#tripEventData.allDestinations.map((dest) => dest.name).includes(evt.target.value)) {
+    this._setState({
+      destination: evt.target.value,
+    });
 
+    if (this.#destinationNames.includes(evt.target.value)) {
+      const destination = this.#destinationsModel.getDestinationByName(evt.target.value);
       this.updateElement({
-        destination
+        destination,
       });
     }
+  };
+
+  #hasEmptyFormFields() {
+    return !this._state.date_from || !this._state.date_to || !this._state.destination || !this._state.base_price;
+  }
+
+  /**
+	 * Сохраняет выбранные данные из стейта в реальные данные
+	 * @param {evt} event событие на кнопке сохранения
+	 */
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+
+    if (this.#hasEmptyFormFields()) {
+      return;
+    }
+
+    this.#handleFormSubmit(EditItemListEventsView.parseStateToTripPoint(this._state));
   };
 
   /**
@@ -391,21 +419,21 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   #setFlatpickrTripEvent() {
 
     this.#flatpickrDateFrom = flatpickr(this.element.querySelector('#event-start-time-1'), {
-      enableTime: true
-      , 'time_24hr': true
-      , dateFormat: 'd/m/y H:i'
-      , defaultDate: humanizeEventDate(this._state.dateFrom, 'eventTime')
-      , maxDate: humanizeEventDate(this._state.dateTo, 'eventTime')
-      , onClose: this.#dateChangeHandler
+      enableTime: true,
+      'time_24hr': true,
+      dateFormat: 'd/m/y H:i',
+      defaultDate: humanizeEventDate(this._state.date_from, 'eventTime'),
+      maxDate: humanizeEventDate(this._state.date_to, 'eventTime'),
+      onClose: this.#dateChangeHandler,
     });
 
     this.#flatpickrDateTo = flatpickr(this.element.querySelector('#event-end-time-1'), {
-      enableTime: true
-      , 'time_24hr': true
-      , dateFormat: 'd/m/y H:i'
-      , defaultDate: humanizeEventDate(this._state.dateTo, 'eventTime')
-      , minDate: humanizeEventDate(this._state.dateFrom, 'eventTime')
-      , onClose: this.#dateChangeHandler
+      enableTime: true,
+      'time_24hr': true,
+      dateFormat: 'd/m/y H:i',
+      defaultDate: humanizeEventDate(this._state.date_to, 'eventTime'),
+      minDate: humanizeEventDate(this._state.date_from, 'eventTime'),
+      onClose: this.#dateChangeHandler,
     });
   }
 
@@ -419,24 +447,32 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     // dateStr default value this library
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
-        dateFrom: getUtcTimeFromLocal(selectedDates)
+        'date_from': getUtcTimeFromLocal(selectedDates)
       });
     } else if (instance === this.#flatpickrDateTo) {
       this.updateElement({
-        dateTo: getUtcTimeFromLocal(selectedDates)
+        'date_to': getUtcTimeFromLocal(selectedDates)
       });
     }
 
   };
 
-  static parseTripEventDataToState({tripEventData}) {
+  static parseTripPointToState(tripPoint, destination, offers, allOffers) {
     return {
-      ...tripEventData
+      ...tripPoint,
+      destination,
+      offers,
+      allOffers,
     };
   }
 
-  static parseStateToTripEventData(state) {
+  static parseStateToTripPoint(state) {
+    const tripPoint = { ...state };
+    tripPoint.offers = tripPoint.offers.map((offer) => offer.id);
+    tripPoint.destination = tripPoint.destination.id;
 
-    return {...state};
+    delete tripPoint.allOffers;
+
+    return tripPoint;
   }
 }

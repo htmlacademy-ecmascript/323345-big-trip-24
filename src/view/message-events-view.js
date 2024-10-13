@@ -1,21 +1,25 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import { NoPointTextByFilter } from '../utils/filter.js';
 
-function createMessageEventsTemplate(message) {
-  return `<p class="trip-events__msg">${message}</p>`;
+function createMessageEventsTemplate(filterType) {
+  const message = NoPointTextByFilter[filterType];
+  return (`
+    <p class="trip-events__msg">${message}</p>
+    `);
 }
 
 export default class MessageEventsView extends AbstractView {
 
-  #message = null;
+  #filterType = null;
 
-  constructor(message) {
+  constructor({filterType}) {
 
     super();
-    this.#message = message;
+    this.#filterType = filterType;
   }
 
   get template() {
-    return createMessageEventsTemplate(this.#message);
+    return createMessageEventsTemplate(this.#filterType);
   }
 }
 

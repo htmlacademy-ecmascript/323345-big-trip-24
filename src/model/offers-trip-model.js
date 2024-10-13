@@ -14,15 +14,28 @@ export default class OffersTripsModel {
   }
 
   getOffersByType(type) {
-    return this.#offers.find((offer) => offer.type === type).offers;
+    return this.#offers
+      .filter((offersItem) => offersItem.type === type)[0]
+      .offers;
   }
 
-  getSelectedOffersByType(type, offersList){
+  getSelectedOffersByType(type, allOffers){
     return this.getOffersByType(type)
-      .filter((offer) => offersList.includes(offer.id));
+      .filter((offer) => allOffers.includes(offer.id));
   }
 
   getOffersById(id) {
     return this.#offers.find((offer) => offer.id === id);
+  }
+
+  getSelectedOffersPrice(type, allOffers) {
+    const selectedOffers = this.getSelectedOffersByType(type, allOffers);
+
+    const totalPrice = selectedOffers.reduce(
+      (accumulator, currentValue) => accumulator + currentValue.price,
+      0,
+    );
+
+    return totalPrice;
   }
 }

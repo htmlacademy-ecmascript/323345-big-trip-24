@@ -20,7 +20,7 @@ const HOUR_HAS_MINUTES = 60;
  * @returns {string} - Humanized representation of given due date, or empty string if due date is not given.
  */
 function humanizeEventDate(eventDate, format) {
-  return eventDate ? dayjs(eventDate).utc().format(FORMATS[format]).toUpperCase() : '';
+  return eventDate ? dayjs(eventDate).utc().format(FORMATS[format]) : '';
 }
 
 /**

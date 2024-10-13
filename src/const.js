@@ -9,10 +9,14 @@ const EVENT_TYPES = [
   , 'sightseeing'
   , 'restaurant'];
 
-const MESSAGE = {
-  EMPTY: 'Click New Event to create your first point',
-  LOADING: 'Loading...',
-  FAILED_LOAD: 'Failed to load latest route information',
+const EMPTY_POINT = {
+  'base_price': 0,
+  'date_from': '',
+  'date_to': '',
+  'destination': '',
+  'is_favorite': false,
+  'offers': [],
+  'type': 'flight'
 };
 
 const FilterType = {
@@ -30,6 +34,26 @@ const SortType = {
   OFFERS: 'offers',
 };
 
+const UserAction = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  ADD_POINT: 'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
 const DisabledSortType = [SortType.EVENT, SortType.OFFERS];
 
-export {EVENT_TYPES, MESSAGE, FilterType, SortType, DisabledSortType};
+export {
+  EVENT_TYPES,
+  EMPTY_POINT,
+  FilterType,
+  SortType,
+  UserAction,
+  UpdateType,
+  DisabledSortType
+};

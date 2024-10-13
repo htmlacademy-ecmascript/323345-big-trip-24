@@ -1,50 +1,19 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanizeEventDate } from '../utils/time.js';
 
-const MAX_DESTINATION_NAME_IN_TITLE = 3;
 
-function createHeaderTripInfoTemplate(allDestinations, tripEventDataList) {
-  function getDateAllPoints() {
-
-    let eventDateStart = '';
-    let eventDateEnd = '';
-
-    if (tripEventDataList.length !== 0) {
-      eventDateStart = tripEventDataList[0].date_from;
-      eventDateEnd = tripEventDataList[tripEventDataList.length - 1].date_to;
-
-      const allDestinationsPoints = (allDestinations.length > MAX_DESTINATION_NAME_IN_TITLE)
-        ? `${allDestinations[0].name} — ... — ${allDestinations[allDestinations.length - 1].name}`
-        : allDestinations.map((destination) => (destination.name)).join(' — ');
-
-      return {eventDateStart, eventDateEnd, allDestinationsPoints};
-    }
-
-    // return {eventDateStart, eventDateEnd};
-  }
-  const date = getDateAllPoints();
-
-  /** Без учета выбранных предложений */
-  function getTotalBasePrice() {
-    const allBasePrice = tripEventDataList.length
-      ? tripEventDataList.reduce((acc, point) => acc + point.basePrice, 0)
-      : 0;
-
-    return allBasePrice;
-  }
-  const totalBasePrice = getTotalBasePrice();
-
+function createHeaderTripInfoTemplate(totallPrice, tripDate, titleDestinations) {
+  const { eventDateStart, eventDateEnd } = tripDate;
 
   return (
     `<section class="trip-main__trip-info  trip-info">
             <div class="trip-info__main">
-              <h1 class="trip-info__title">${date.allDestinationsPoints}</h1>
+              <h1 class="trip-info__title">${titleDestinations}</h1>
 
-              <p class="trip-info__dates">${humanizeEventDate(date.eventDateStart, 'headerDate')} — ${humanizeEventDate(date.eventDateEnd, 'headerDate')}</p>
+              <p class="trip-info__dates">${eventDateStart} &mdash; ${eventDateEnd}</p>
             </div>
 
             <p class="trip-info__cost">
-              Total: €&nbsp;<span class="trip-info__cost-value">${totalBasePrice}</span>
+              Total: €&nbsp;<span class="trip-info__cost-value">${totallPrice}</span>
             </p>
           </section>`
   );
@@ -52,19 +21,19 @@ function createHeaderTripInfoTemplate(allDestinations, tripEventDataList) {
 
 export default class HeaderTripInfoView extends AbstractView {
 
-  #allDestinations = null;
-  #tripEventDataList = null;
+  #totallPrice = null;
+  #tripDate = null;
+  #titleDestinations = null;
 
-  constructor({allDestinations, tripEventDataList }) {
+  constructor({ totallPrice, tripDate, titleDestinations,}) {
 
     super();
-    this.#allDestinations = allDestinations.destinations;
-    this.#tripEventDataList = tripEventDataList;
+    this.#totallPrice = totallPrice;
+    this.#tripDate = tripDate;
+    this.#titleDestinations = titleDestinations;
   }
 
   get template() {
-    return createHeaderTripInfoTemplate(this.#allDestinations, this.#tripEventDataList);
+    return createHeaderTripInfoTemplate(this.#totallPrice, this.#tripDate, this.#titleDestinations);
   }
 }
-
-
