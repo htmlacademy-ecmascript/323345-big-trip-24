@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { UserAction, UpdateType, EMPTY_POINT } from '../const.js';
+import { UserAction, UpdateType, EMPTY_POINT } from '../const/const.js';
 import EditItemListEventsView from '../view/edit-item-list-events-view.js';
 
 

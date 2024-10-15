@@ -1,14 +1,9 @@
 import { render, replace, remove } from '../framework/render.js';
-import { UserAction, UpdateType } from '../const.js';
+import { UserAction, UpdateType } from '../const/const.js';
+import { Mode } from '../const/change-mode-const.js';
 
 import ItemListEventsView from '../view/item-list-events-view.js';
 import EditItemListEventsView from '../view/edit-item-list-events-view.js';
-
-
-const Mode = {
-  DEFAULT: 'DEFAULT',
-  EDITING: 'EDITING',
-};
 
 export default class TripPointsPresenter {
 

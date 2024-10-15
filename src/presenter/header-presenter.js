@@ -1,9 +1,8 @@
 import { render, remove, replace, RenderPosition } from '../framework/render.js';
 import { humanizeEventDate } from '../utils/time.js';
+import { MAX_DESTINATION_NAME_IN_TITLE } from '../const/header-const.js';
 
 import HeaderTripInfoView from '../view/header-trip-info-view.js';
-
-const MAX_DESTINATION_NAME_IN_TITLE = 3;
 
 export default class HeaderPresenter {
 
@@ -11,6 +10,7 @@ export default class HeaderPresenter {
   #pointsTripModel = null;
   #offersTripModel = null;
   #destinationsTripModel = null;
+  #filtersModel = null;
 
   #headerTripComponent = null;
   #pointsTrip = [];
@@ -20,13 +20,16 @@ export default class HeaderPresenter {
     pointsTripModel,
     offersTripModel,
     destinationsTripModel,
+    filtersModel
   }) {
     this.#headerContainer = headerContainer;
     this.#pointsTripModel = pointsTripModel;
     this.#offersTripModel = offersTripModel;
     this.#destinationsTripModel = destinationsTripModel;
+    this.#filtersModel = filtersModel;
 
     this.#pointsTripModel.addObserver(this.#handleModelEvent);
+    this.#filtersModel.addObserver(this.#handleModelEvent);
 
   }
 
@@ -62,6 +65,7 @@ export default class HeaderPresenter {
   }
 
   #handleModelEvent = () => {
+    this.#pointsTrip = [];
     this.init();
   };
 

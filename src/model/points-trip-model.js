@@ -1,37 +1,58 @@
+import { UpdateType } from '../const/const.js';
 import Observable from '../framework/observable.js';
-import { points } from '../mock/points.js';
-
 export default class PointsTripModel extends Observable {
-  #dataPoints = null;
-  constructor() {
+  #dataPoints = [];
+  #pointsApiService = null;
+
+  constructor({pointsApiService}) {
     super();
-    this.#dataPoints = points;
+    this.#pointsApiService = pointsApiService;
   }
 
   get points() {
     return this.#dataPoints;
   }
 
-  updatePoint(updateType, update) {
+  async init() {
+    try {
+      this.#dataPoints = await this.#pointsApiService.points;
+    } catch (err) {
+      throw new Error('points not found');
+    }
+    this._notify(UpdateType.INIT);
+  }
+
+  async updatePoint(updateType, update) {
+
     const index = this.#dataPoints.findIndex((point) => point.id === update.id);
 
     if(index === -1){
       throw new Error('Can\'t update unexisting point');
     }
 
-    this.#dataPoints = this.#dataPoints.map(
-      (item) => (item.id === update.id ? update : item));
+    try {
+      const updatePoint = await this.#pointsApiService.updatePoint(update);
 
-    this._notify(updateType, update);
+      this.#dataPoints = this.#dataPoints.map(
+        (item) => (item.id === updatePoint.id ? updatePoint : item));
+
+      this._notify(updateType, updatePoint);
+    } catch(err) {
+      throw new Error('Can\'t update point', err);
+    }
   }
 
-  addPoint(updateType, update){
-    this.#dataPoints = [
-      update,
-      ...this.#dataPoints
-    ];
+  async addPoint(updateType, update){
+    try {
+      this.#dataPoints = [
+        update,
+        ...this.#dataPoints
+      ];
 
-    this._notify(updateType, update);
+      this._notify(updateType, update);
+    } catch(err) {
+      throw new Error(err);
+    }
   }
 
   deletePoint(updateType, update) {

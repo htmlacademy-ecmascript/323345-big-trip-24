@@ -1,17 +1,16 @@
-import { render, remove } from '../framework/render.js';
-import { SortType, FilterType, UpdateType, UserAction } from '../const.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
+import { SortType, FilterType, UpdateType, UserAction } from '../const/const.js';
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/sort.js';
 import { filter } from '../utils/filter.js';
 
-import FiltersPresenter from './filters-presenter.js';
-import MessageEventsView from '../view/message-events-view.js';
-import SortEventsView from '../view/sort-events-view.js';
-import ListEventsView from '../view/list-events-view.js';
-import NewTripPointPresenter from './new-trip-points-presenter.js';
 
+import NewTripPointPresenter from './new-trip-points-presenter.js';
 import TripPointsPresenter from './trip-points-presenter.js';
 
-const tripFiltersElement = document.querySelector('.trip-controls__filters');
+import SortEventsView from '../view/sort-events-view.js';
+import ListEventsView from '../view/list-events-view.js';
+import MessageLoadingView from '../view/message-loading-view.js';
+import MessageEventsView from '../view/message-events-view.js';
 
 
 export default class ListPresenter {
@@ -26,11 +25,13 @@ export default class ListPresenter {
   #newTripPointPresenter = null;
 
   #noTripEventsComponent = null;
+  #tripLoadingComponent = new MessageLoadingView();
   #listComponent = new ListEventsView();
 
   #sortComponent = null;
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
+  #isLoading = true;
 
   constructor({
     listContainer,
@@ -55,7 +56,6 @@ export default class ListPresenter {
       onDestroy: onNewTripPointClose,
     });
 
-
     /** Подписываемся на изменение данных модели и прокидываем callback */
     this.#pointsTripModel.addObserver(this.#handleModelEvent);
     this.#filtersModel.addObserver(this.#handleModelEvent);
@@ -79,12 +79,8 @@ export default class ListPresenter {
   }
 
   init() {
-    /** Отрисовка компонента фильтрации */
-    this.#renderFilters();
-    // render(this.#listComponent, this.#listContainer);
     /** Отрисовка всех компонентов путешествия */
     this.#renderList();
-
   }
 
   createTripPoint() {
@@ -94,29 +90,29 @@ export default class ListPresenter {
     if (this.#noTripEventsComponent) {
       remove(this.#noTripEventsComponent);
     }
+
     this.#newTripPointPresenter.init();
   }
 
   #renderList() {
-    this.#renderSort();
     render(this.#listComponent, this.#listContainer);
+
+
+    if (this.#isLoading) {
+      this.#renderMessageLoadingComponent();
+      return;
+    }
+
+    this.#renderSort();
     if (this.#pointsTripModel.points.length === 0) {
       /** Если список событий пуст, то отрисовываем сообщение */
       this.#renderNoTripEventsComponent();
-    } else {
-      /** Рендерим список событий */
-      this.#renderAllTripEvents(this.tripPoints);
+      return;
     }
-  }
 
-  #renderFilters() {
+    /** Рендерим список событий */
+    this.#renderAllTripEvents(this.tripPoints);
 
-    const filtersPresenter = new FiltersPresenter({
-      filterContainer: tripFiltersElement,
-      filtersModel: this.#filtersModel,
-      pointsTripModel: this.#pointsTripModel,
-    });
-    return filtersPresenter.init();
   }
 
   /** Обновление компонента с событиями путешествия */
@@ -164,7 +160,12 @@ export default class ListPresenter {
         this.#renderList();
         break;
       case UpdateType.MAJOR:
-        this.#clearTripPointList({ resetRenderedTripPointsCount: true, resetSortType: true });
+        this.#clearTripPointList({ resetSortType: true });
+        this.#renderList();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#tripLoadingComponent);
         this.#renderList();
         break;
     }
@@ -177,7 +178,7 @@ export default class ListPresenter {
       currentSortType: this.#currentSortType,
     });
 
-    render(this.#sortComponent, this.#listContainer);
+    render(this.#sortComponent, this.#listContainer, RenderPosition.AFTERBEGIN);
   }
 
   /** Перерисовывает события согласно типу сортировки
@@ -199,6 +200,7 @@ export default class ListPresenter {
     if (this.#noTripEventsComponent) {
       remove(this.#noTripEventsComponent);
     }
+
     const tripPointsPresenter = new TripPointsPresenter({
       pointListContainer: this.#listComponent.element,
       destinationsModel: this.#destinationsModel,
@@ -210,6 +212,10 @@ export default class ListPresenter {
     tripPointsPresenter.init(tripPoint);
 
     this.#tripPointsPresentersId.set(tripPoint.id, tripPointsPresenter);
+  }
+
+  #renderMessageLoadingComponent() {
+    render(this.#tripLoadingComponent, this.#listComponent.element, RenderPosition.AFTERBEGIN);
   }
 
   #renderNoTripEventsComponent() {
@@ -234,6 +240,7 @@ export default class ListPresenter {
     this.#tripPointsPresentersId.clear();
 
     remove(this.#sortComponent);
+    remove(this.#tripLoadingComponent);
 
     if (this.#noTripEventsComponent) {
       remove(this.#noTripEventsComponent);
