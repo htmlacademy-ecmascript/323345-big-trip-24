@@ -18,6 +18,7 @@ import DestinationsApiService from './api-service/destinations-api-service.js';
 import { AUTHORIZATION, END_POINT } from './const/api-const.js';
 
 import ButtonAddNewEventView from './view/button-add-new-event-view.js';
+import FailedLoadView from './view/failed-load-view.js';
 
 
 const tripEventsElement = document.querySelector('.trip-events');
@@ -93,8 +94,10 @@ Promise.all(
 })
   .catch((err) => {
     buttonAddNewEventComponent.element.disabled = true;
+    const failedLoadViewComonent = new FailedLoadView;
+    render(failedLoadViewComonent, tripEventsElement);
+    listPresenter.init(failedLoadViewComonent);
     throw new Error(err);
   });
-
 
 listPresenter.init();
