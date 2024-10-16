@@ -94,26 +94,6 @@ export default class ListPresenter {
     this.#newTripPointPresenter.init();
   }
 
-  #renderList() {
-    render(this.#listComponent, this.#listContainer);
-
-
-    if (this.#isLoading) {
-      this.#renderMessageLoadingComponent();
-      return;
-    }
-
-    this.#renderSort();
-    if (this.#pointsTripModel.points.length === 0) {
-      /** Если список событий пуст, то отрисовываем сообщение */
-      this.#renderNoTripEventsComponent();
-      return;
-    }
-
-    /** Рендерим список событий */
-    this.#renderAllTripEvents(this.tripPoints);
-
-  }
 
   /** Обновление компонента с событиями путешествия */
   #handleModeChange = () => {
@@ -227,9 +207,9 @@ export default class ListPresenter {
 
 
   /** Создание списка событий путешествия */
-  #renderAllTripEvents(tripPoints) {
+  #renderAllTripEvents() {
     this.#renderNoTripEventsComponent();
-    tripPoints.forEach((tripPoint) => this.#renderTripPoint(tripPoint));
+    this.tripPoints.forEach((tripPoint) => this.#renderTripPoint(tripPoint));
   }
 
   /** Очистка компонента с событиями путешествия */
@@ -249,5 +229,25 @@ export default class ListPresenter {
     if (resetSortType) {
       this.#currentSortType = SortType.DAY;
     }
+  }
+
+  #renderList() {
+    render(this.#listComponent, this.#listContainer);
+
+    if (this.#isLoading) {
+      this.#renderMessageLoadingComponent();
+      return;
+    }
+
+    this.#renderSort();
+    if (this.#pointsTripModel.points.length === 0) {
+      /** Если список событий пуст, то отрисовываем сообщение */
+      this.#renderNoTripEventsComponent();
+      return;
+    }
+
+    /** Рендерим список событий */
+    this.#renderAllTripEvents();
+
   }
 }

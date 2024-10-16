@@ -29,7 +29,7 @@ export default class PointsApiService extends ApiService {
     return parseResponse;
   }
 
-  async addTripPoint(point) {
+  async addPoint(point) {
     const response = await this._load({
       url: 'points',
       method: Method.POST,
@@ -48,7 +48,6 @@ export default class PointsApiService extends ApiService {
       method: Method.DELETE,
     });
 
-    const parsedResponse = await ApiService.parseResponse(response);
-    return parsedResponse;
+    return response;
   }
 }

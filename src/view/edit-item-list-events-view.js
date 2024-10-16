@@ -445,13 +445,14 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    */
   #dateChangeHandler = (selectedDates, dateStr, instance) => {
     // dateStr default value this library
+    const dateInUtc = getUtcTimeFromLocal(selectedDates);
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
-        'date_from': getUtcTimeFromLocal(selectedDates)
+        'date_from': new Date(dateInUtc).toISOString()
       });
     } else if (instance === this.#flatpickrDateTo) {
       this.updateElement({
-        'date_to': getUtcTimeFromLocal(selectedDates)
+        'date_to': new Date(dateInUtc).toISOString()
       });
     }
 
