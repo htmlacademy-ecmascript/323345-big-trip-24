@@ -37,13 +37,6 @@ const destinationsTripModel = new DestinationsTripModel({
 
 const filtersModel = new FiltersModel();
 
-const filtersPresenter = new FiltersPresenter({
-  filterContainer: tripFiltersElement,
-  filtersModel,
-  pointsTripModel,
-});
-
-
 const listPresenter = new ListPresenter({
   listContainer: tripEventsElement,
   pointsTripModel,
@@ -53,13 +46,6 @@ const listPresenter = new ListPresenter({
   onNewTripPointClose: handleNewTripPointFormClose
 });
 
-const headerPresenter = new HeaderPresenter({
-  headerContainer,
-  pointsTripModel,
-  offersTripModel,
-  destinationsTripModel,
-  filtersModel,
-});
 
 const buttonAddNewEventComponent = new ButtonAddNewEventView({
   onClick: handleButtonNewPointClick
@@ -74,6 +60,7 @@ function handleButtonNewPointClick() {
   buttonAddNewEventComponent.element.disabled = true;
 }
 
+
 Promise.all(
   [
     offersTripModel.init(),
@@ -83,9 +70,26 @@ Promise.all(
     }),
   ]
 ) .then (() => {
+  const filtersPresenter = new FiltersPresenter({
+    filterContainer: tripFiltersElement,
+    filtersModel,
+    pointsTripModel,
+  });
+
   filtersPresenter.init();
-  headerPresenter.init();
-  render(buttonAddNewEventComponent, headerContainer);
+
+  const headerPresenter = new HeaderPresenter({
+    headerContainer,
+    pointsTripModel,
+    offersTripModel,
+    destinationsTripModel,
+    filtersModel,
+  });
+
+  headerPresenter.init().finally(() => {
+    render(buttonAddNewEventComponent, headerContainer);
+
+  });
 })
   .catch((err) => {
     buttonAddNewEventComponent.element.disabled = true;
