@@ -1,14 +1,9 @@
 import { render, replace, remove } from '../framework/render.js';
-import { UserAction, UpdateType } from '../const.js';
+import { UserAction, UpdateType } from '../const/const.js';
+import { Mode } from '../const/change-mode-const.js';
 
 import ItemListEventsView from '../view/item-list-events-view.js';
 import EditItemListEventsView from '../view/edit-item-list-events-view.js';
-
-
-const Mode = {
-  DEFAULT: 'DEFAULT',
-  EDITING: 'EDITING',
-};
 
 export default class TripPointsPresenter {
 
@@ -36,7 +31,14 @@ export default class TripPointsPresenter {
     this.#handleModeChange = onModeChange;
   }
 
-  init(tripPoint) {
+  async init(tripPoint) {
+    if (this.#offersModel.offers.length === 0) {
+      await this.#offersModel.init();
+    }
+    if (this.#destinationsModel.destinations.length === 0) {
+      await this.#destinationsModel.init();
+    }
+
     this.#tripPoint = tripPoint;
 
     this.#createTripPointComponent(tripPoint);

@@ -1,9 +1,16 @@
-import {destinations} from '../mock/destinations.js';
-
 export default class DestinationsTripModel {
-  #destinations = null;
-  constructor() {
-    this.#destinations = destinations;
+  #destinations = [];
+  #destinationsApiService = null;
+  constructor({destinationsApiService}) {
+    this.#destinationsApiService = destinationsApiService;
+  }
+
+  async init() {
+    try {
+      this.#destinations = await this.#destinationsApiService.destinations;
+    } catch(err) {
+      throw new Error('destinations not found');
+    }
   }
 
   getDestinationById(points) {
@@ -14,6 +21,7 @@ export default class DestinationsTripModel {
     return this.#destinations
       .filter((destinationItem) => destinationItem.name === destinationName)[0];
   }
+
 
   getDestinationNames() {
     return this.#destinations.map((destination) => destination.name);

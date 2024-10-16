@@ -1,31 +1,31 @@
-import {offers} from '../mock/offers.js';
+
 export default class OffersTripsModel {
-  #offers;
-  constructor() {
-    this.#offers = offers;
+  #offers = [];
+  #offersApiService;
+
+  constructor({offersApiService}) {
+    this.#offersApiService = offersApiService;
   }
 
   get offers() {
     return this.#offers;
   }
 
-  set offers(offersPoints) {
-    this.#offers = offersPoints;
+  async init() {
+    this.#offers = await this.#offersApiService.offers
+      .catch(new Error('offers not found'));
   }
 
   getOffersByType(type) {
     return this.#offers
-      .filter((offersItem) => offersItem.type === type)[0]
+      .find((offersItem) => offersItem.type === type)
       .offers;
   }
+
 
   getSelectedOffersByType(type, allOffers){
     return this.getOffersByType(type)
       .filter((offer) => allOffers.includes(offer.id));
-  }
-
-  getOffersById(id) {
-    return this.#offers.find((offer) => offer.id === id);
   }
 
   getSelectedOffersPrice(type, allOffers) {
@@ -35,7 +35,6 @@ export default class OffersTripsModel {
       (accumulator, currentValue) => accumulator + currentValue.price,
       0,
     );
-
     return totalPrice;
   }
 }

@@ -110,7 +110,6 @@ export default class ItemListEventsView extends AbstractView {
   }
 
   get template() {
-
     return createItemListEventsTemplate(this.#tripPoint, this.#destination, this.#offers);
   }
 

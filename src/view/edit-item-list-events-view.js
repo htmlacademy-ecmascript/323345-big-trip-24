@@ -1,7 +1,7 @@
 import flatpickr from 'flatpickr';
 import he from 'he';
 
-import {EVENT_TYPES} from '../const.js';
+import {EVENT_TYPES} from '../const/const.js';
 import { capitalizeFirstLetter } from '../utils/utils.js';
 import { humanizeEventDate, getUtcTimeFromLocal } from '../utils/time.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
@@ -445,13 +445,14 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    */
   #dateChangeHandler = (selectedDates, dateStr, instance) => {
     // dateStr default value this library
+    const dateInUtc = getUtcTimeFromLocal(selectedDates);
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
-        'date_from': getUtcTimeFromLocal(selectedDates)
+        'date_from': new Date(dateInUtc).toISOString()
       });
     } else if (instance === this.#flatpickrDateTo) {
       this.updateElement({
-        'date_to': getUtcTimeFromLocal(selectedDates)
+        'date_to': new Date(dateInUtc).toISOString()
       });
     }
 
