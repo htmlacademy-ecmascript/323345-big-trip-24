@@ -1,13 +1,11 @@
 import ApiService from '../framework/api-service.js';
 
-
 const Method = {
   GET: 'GET',
   PUT: 'PUT',
   POST: 'POST',
   DELETE: 'DELETE',
 };
-
 
 export default class PointsApiService extends ApiService {
 
@@ -24,9 +22,9 @@ export default class PointsApiService extends ApiService {
       headers: new Headers({'Content-Type': 'application/json'}),
     });
 
-    const parseResponse = ApiService.parseResponse(response);
+    const parsedResponse = await ApiService.parseResponse(response);
 
-    return parseResponse;
+    return parsedResponse;
   }
 
   async addPoint(point) {

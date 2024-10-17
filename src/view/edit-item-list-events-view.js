@@ -7,7 +7,7 @@ import { humanizeEventDate, getUtcTimeFromLocal } from '../utils/time.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
 
-function createOffersTemplate(offers, allOffers) {
+function createOffersTemplate(offers, allOffers, isDisabled) {
 
   return (`
       <section class="event__section  event__section--offers">
@@ -19,7 +19,14 @@ function createOffersTemplate(offers, allOffers) {
       ? allOffers.map((offer) =>
         (`
           <div class="event__offer-selector">
-            <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="${offer.title}" ${offers.includes(offer) && 'checked'}>
+            <input
+              class="event__offer-checkbox  visually-hidden"
+              id="${offer.id}"
+              type="checkbox"
+              name="${offer.title}"
+              ${offers.includes(offer) && 'checked'}
+              ${isDisabled ? 'disabled' : ''}
+            >
             <label class="event__offer-label" for="${offer.id}">
               <span class="event__offer-title">${offer.title}</span>
                 &plus;&euro;&nbsp;
@@ -66,7 +73,7 @@ function createDestinationSectionTemplate({ description, pictures }) {
   );
 }
 
-function createEventTypeList({checkedType}) {
+function createEventTypeList({checkedType, isDisabled}) {
 
   return (`
     <div class="event__type-list">
@@ -81,6 +88,7 @@ function createEventTypeList({checkedType}) {
               type="radio" name="event-type"
               value="${type}"
               ${type === checkedType ? 'checked' : ''}
+              ${isDisabled ? 'disabled' : ''}
             >
             <label
               class="event__type-label  event__type-label--${type}"
@@ -96,7 +104,11 @@ function createEventTypeList({checkedType}) {
   `);
 }
 
-function createEditItemListEventsTemplate(tripPoint, destinationNames) {
+function createEditItemListEventsTemplate(
+  tripPoint,
+  destinationNames,
+  isNewPoint,
+) {
 
   const {
     type,
@@ -105,7 +117,10 @@ function createEditItemListEventsTemplate(tripPoint, destinationNames) {
     base_price: price,
     destination,
     offers,
-    allOffers
+    allOffers,
+    isDisabled,
+    isSaving,
+    isDeleting,
   } = tripPoint;
   const timeStart = humanizeEventDate(dateFrom, 'eventTime') ? humanizeEventDate(dateFrom, 'eventTime') : '';
   const timeEnd = humanizeEventDate(dateTo, 'eventTime') ? humanizeEventDate(dateTo, 'eventTime') : '';
@@ -121,14 +136,21 @@ function createEditItemListEventsTemplate(tripPoint, destinationNames) {
             </label>
             <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
-            ${createEventTypeList({checkedType: type})}
+            ${createEventTypeList({checkedType: type, isDisabled })}
           </div>
 
           <div class="event__field-group  event__field-group--destination">
             <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? he.encode(destination.name) : ''}" list="destination-list-1">
+            <input
+              class="event__input  event__input--destination"
+              id="event-destination-1"
+              type="text" name="event-destination"
+              value="${destination ? he.encode(destination.name) : ''}"
+              list="destination-list-1"
+              ${isDisabled ? 'disabled' : ''}
+            >
 
             <datalist id="destination-list-1">
               ${destinationNames.map((destinationName) => (`
@@ -154,8 +176,23 @@ function createEditItemListEventsTemplate(tripPoint, destinationNames) {
             <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">Delete</button>
+          <button
+            class="event__save-btn  btn  btn--blue"
+            type="submit"
+            ${isDisabled ? 'disabled' : ''}
+          >
+
+            ${isSaving ? 'Saving...' : 'Save'}
+
+          </button>
+          <button
+            class="event__reset-btn"
+            type="reset"
+            ${isDisabled ? 'disabled' : ''}>
+
+            ${isNewPoint ? 'Cancel' : (` ${isDeleting ? 'Deleting...' : 'Delete'} `)}
+
+            </button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>
@@ -179,6 +216,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleCloseFormClick = null;
   #handleDeleteClick = null;
+  #isNewPoint = null;
 
   #destination = null;
   #offers = null;
@@ -195,6 +233,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       onFormSubmit,
       onCloseFormClick,
       onDeleteClick,
+      isNewPoint,
     }
   ) {
     super();
@@ -203,6 +242,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     this.#handleFormSubmit = onFormSubmit;
     this.#handleCloseFormClick = onCloseFormClick;
     this.#handleDeleteClick = onDeleteClick;
+    this.#isNewPoint = isNewPoint;
 
     this.#destination = this.#destinationsModel.getDestinationById(tripPoint.destination);
     this.#offers = this.#offersModel.getSelectedOffersByType(tripPoint.type, tripPoint.offers);
@@ -217,7 +257,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
 
   get template() {
 
-    return createEditItemListEventsTemplate(this._state, this.#destinationNames);
+    return createEditItemListEventsTemplate(this._state, this.#destinationNames, this.#isNewPoint);
   }
 
   /**
@@ -243,11 +283,15 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     this.element.querySelector('.event__input.event__input--destination')
       .addEventListener('input', this.#destinationInputHandler);
 
-    this.element.querySelector('.event__reset-btn')
-      .addEventListener('click', this.#formDeleteClickHandler);
-
     this.#setFlatpickrTripEvent();
 
+    if (this.#isNewPoint) {
+      this.element.querySelector('.event__reset-btn')
+        .addEventListener('click', this.#closeFormClickHandler);
+    } else {
+      this.element.querySelector('.event__reset-btn')
+        .addEventListener('click', this.#formDeleteClickHandler);
+    }
   }
 
   /**
@@ -339,14 +383,8 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
 
-    const EventPrice = Number(evt.target.value);
-
-    if (!EventPrice) {
-      return;
-    }
-
     this.updateElement({
-      'base_price': EventPrice,
+      'base_price': /^(\d+)$/.test(evt.target.value) ? parseInt(evt.target.value, 10) : this._state.base_price,
     });
   };
 
@@ -379,7 +417,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
 
     this._setState({
-      destination: evt.target.value,
+      destination: evt.target.value !== '' ? evt.target.value : this._state.destination,
     });
 
     if (this.#destinationNames.includes(evt.target.value)) {
@@ -390,20 +428,12 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
   };
 
-  #hasEmptyFormFields() {
-    return !this._state.date_from || !this._state.date_to || !this._state.destination || !this._state.base_price;
-  }
-
   /**
 	 * Сохраняет выбранные данные из стейта в реальные данные
 	 * @param {evt} event событие на кнопке сохранения
 	 */
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-
-    if (this.#hasEmptyFormFields()) {
-      return;
-    }
 
     this.#handleFormSubmit(EditItemListEventsView.parseStateToTripPoint(this._state));
   };
@@ -445,14 +475,17 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    */
   #dateChangeHandler = (selectedDates, dateStr, instance) => {
     // dateStr default value this library
+    if (!dateStr) {
+      return;
+    }
     const dateInUtc = getUtcTimeFromLocal(selectedDates);
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
-        'date_from': new Date(dateInUtc).toISOString()
+        'date_from': instance !== null ? new Date(dateInUtc).toISOString() : null
       });
     } else if (instance === this.#flatpickrDateTo) {
       this.updateElement({
-        'date_to': new Date(dateInUtc).toISOString()
+        'date_to': instance ? new Date(dateInUtc).toISOString() : ''
       });
     }
 
@@ -464,15 +497,25 @@ export default class EditItemListEventsView extends AbstractStatefulView {
       destination,
       offers,
       allOffers,
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false,
     };
   }
 
   static parseStateToTripPoint(state) {
     const tripPoint = { ...state };
     tripPoint.offers = tripPoint.offers.map((offer) => offer.id);
-    tripPoint.destination = tripPoint.destination.id;
+    if (!tripPoint.destination){
+      tripPoint.destination = null;
+    } else {
+      tripPoint.destination = tripPoint.destination.id;
+    }
 
     delete tripPoint.allOffers;
+    delete tripPoint.isDisabled;
+    delete tripPoint.isSaving;
+    delete tripPoint.isDeleting;
 
     return tripPoint;
   }

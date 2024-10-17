@@ -40,6 +40,7 @@ export default class NewTripPointPresenter {
       onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleDeleteClick,
       onCloseFormClick: this.#handleFormCloseClick,
+      isNewPoint: true,
     });
 
     render(this.#tripPointEditComponent, this.#pointComponentContainer, RenderPosition.AFTERBEGIN);
@@ -60,6 +61,25 @@ export default class NewTripPointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
+  setSaving() {
+    this.#tripPointEditComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#tripPointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#tripPointEditComponent.shake(resetFormState);
+  }
+
   #handleFormSubmit = (tripPoint) => {
 
     this.#handleDataChange(
@@ -67,8 +87,6 @@ export default class NewTripPointPresenter {
       UpdateType.MINOR,
       tripPoint,
     );
-
-    this.destroy();
   };
 
   #handleDeleteClick = () => {

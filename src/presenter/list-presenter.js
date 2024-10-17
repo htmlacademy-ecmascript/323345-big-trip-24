@@ -3,7 +3,6 @@ import { SortType, FilterType, UpdateType, UserAction } from '../const/const.js'
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/sort.js';
 import { filter } from '../utils/filter.js';
 
-
 import NewTripPointPresenter from './new-trip-points-presenter.js';
 import TripPointsPresenter from './trip-points-presenter.js';
 
@@ -12,6 +11,12 @@ import ListEventsView from '../view/list-events-view.js';
 import MessageLoadingView from '../view/message-loading-view.js';
 import MessageEventsView from '../view/message-events-view.js';
 
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 export default class ListPresenter {
 
@@ -32,6 +37,11 @@ export default class ListPresenter {
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
   #isLoading = true;
+
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT,
+  });
 
   constructor({
     listContainer,
@@ -65,7 +75,6 @@ export default class ListPresenter {
     this.#filterType = this.#filtersModel.filter;
     const tripPoints = this.#pointsTripModel.points;
     const filteredTripPoints = filter[this.#filterType](tripPoints);
-
     switch (this.#currentSortType) {
       case SortType.DAY:
         return filteredTripPoints.sort(sortEventsByDay);
@@ -78,9 +87,10 @@ export default class ListPresenter {
     return filteredTripPoints;
   }
 
-  init() {
+  init(failedLoadViewComonent) {
     /** Отрисовка всех компонентов путешествия */
-    this.#renderList();
+    render(this.#listComponent, this.#listContainer);
+    this.#renderList(failedLoadViewComonent);
   }
 
   createTripPoint() {
@@ -92,6 +102,29 @@ export default class ListPresenter {
     }
 
     this.#newTripPointPresenter.init();
+  }
+
+
+  #renderList(failedLoadViewComonent) {
+
+    if (this.#isLoading) {
+      this.#renderMessageLoadingComponent();
+      if (failedLoadViewComonent) {
+        remove(this.#tripLoadingComponent);
+      }
+      return;
+    }
+
+    if (this.#pointsTripModel.points.length === 0) {
+      /** Если список событий пуст, то отрисовываем сообщение */
+      this.#renderNoTripEventsComponent();
+      return;
+    }
+
+    this.#renderSort();
+    /** Рендерим список событий */
+    this.#renderAllTripEvents();
+
   }
 
 
@@ -109,18 +142,41 @@ export default class ListPresenter {
    * @param {object} update - обновленные данные (объект с данными от вьюшки)
    * @returns Отправляет обновленные данные в модель для обновленния
    */
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-        this.#pointsTripModel.updatePoint(updateType, update);
+
+        this.#tripPointsPresentersId.get(update.id).setSaving();
+        try {
+          await this.#pointsTripModel.updatePoint(updateType, update);
+        } catch (err) {
+          this.#tripPointsPresentersId.get(update.id).setAborting();
+        }
         break;
+
       case UserAction.ADD_POINT:
-        this.#pointsTripModel.addPoint(updateType, update);
+
+        this.#newTripPointPresenter.setSaving();
+        try {
+          await this.#pointsTripModel.addPoint(updateType, update);
+        } catch (err) {
+          this.#newTripPointPresenter.setAborting();
+        }
         break;
+
       case UserAction.DELETE_POINT:
-        this.#pointsTripModel.deletePoint(updateType, update);
+
+        this.#tripPointsPresentersId.get(update.id).setDeleting();
+        try {
+          await this.#pointsTripModel.deletePoint(updateType, update);
+        } catch (err) {
+          this.#tripPointsPresentersId.get(update.id).setAborting();
+        }
         break;
     }
+    this.#uiBlocker.unblock();
   };
 
   /**
@@ -200,7 +256,7 @@ export default class ListPresenter {
 
   #renderNoTripEventsComponent() {
     this.#noTripEventsComponent = new MessageEventsView({
-      filterType: this.#filterType,
+      filterType: this.#filtersModel.filter,
     });
     render(this.#noTripEventsComponent, this.#listComponent.element);
   }
@@ -229,25 +285,5 @@ export default class ListPresenter {
     if (resetSortType) {
       this.#currentSortType = SortType.DAY;
     }
-  }
-
-  #renderList() {
-    render(this.#listComponent, this.#listContainer);
-
-    if (this.#isLoading) {
-      this.#renderMessageLoadingComponent();
-      return;
-    }
-
-    this.#renderSort();
-    if (this.#pointsTripModel.points.length === 0) {
-      /** Если список событий пуст, то отрисовываем сообщение */
-      this.#renderNoTripEventsComponent();
-      return;
-    }
-
-    /** Рендерим список событий */
-    this.#renderAllTripEvents();
-
   }
 }
