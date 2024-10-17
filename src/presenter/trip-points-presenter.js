@@ -68,7 +68,8 @@ export default class TripPointsPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#tripPointEditComponent, prevTripPointEditComponent);
+      replace(this.#tripPointComponent, prevTripPointEditComponent);
+      this.#mode = Mode.DEFAULT;
     }
 
     remove(prevTripPointComponent);
@@ -193,7 +194,7 @@ export default class TripPointsPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update,
     );
-    this.#replaceFormToCard();
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
   #handleFavoriteClick = () => {

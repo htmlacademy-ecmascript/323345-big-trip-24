@@ -147,6 +147,7 @@ export default class ListPresenter {
 
     switch (actionType) {
       case UserAction.UPDATE_POINT:
+
         this.#tripPointsPresentersId.get(update.id).setSaving();
         try {
           await this.#pointsTripModel.updatePoint(updateType, update);
@@ -154,19 +155,23 @@ export default class ListPresenter {
           this.#tripPointsPresentersId.get(update.id).setAborting();
         }
         break;
+
       case UserAction.ADD_POINT:
+
         this.#newTripPointPresenter.setSaving();
         try {
           await this.#pointsTripModel.addPoint(updateType, update);
-        } catch (error) {
+        } catch (err) {
           this.#newTripPointPresenter.setAborting();
         }
         break;
+
       case UserAction.DELETE_POINT:
+
         this.#tripPointsPresentersId.get(update.id).setDeleting();
         try {
           await this.#pointsTripModel.deletePoint(updateType, update);
-        } catch (error) {
+        } catch (err) {
           this.#tripPointsPresentersId.get(update.id).setAborting();
         }
         break;

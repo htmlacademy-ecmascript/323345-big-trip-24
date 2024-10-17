@@ -143,7 +143,14 @@ function createEditItemListEventsTemplate(
             <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? he.encode(destination.name) : ''}" list="destination-list-1">
+            <input
+              class="event__input  event__input--destination"
+              id="event-destination-1"
+              type="text" name="event-destination"
+              value="${destination ? he.encode(destination.name) : ''}"
+              list="destination-list-1"
+              ${isDisabled ? 'disabled' : ''}
+            >
 
             <datalist id="destination-list-1">
               ${destinationNames.map((destinationName) => (`
@@ -376,14 +383,8 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
 
-    const EventPrice = Number(evt.target.value);
-
-    if (!EventPrice) {
-      return;
-    }
-
     this.updateElement({
-      'base_price': EventPrice,
+      'base_price': /^(\d+)$/.test(evt.target.value) ? parseInt(evt.target.value, 10) : this._state.base_price,
     });
   };
 
@@ -416,7 +417,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
 
     this._setState({
-      destination: evt.target.value,
+      destination: evt.target.value !== '' ? evt.target.value : this._state.destination,
     });
 
     if (this.#destinationNames.includes(evt.target.value)) {
@@ -427,20 +428,12 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
   };
 
-  #hasEmptyFormFields() {
-    return !this._state.date_from || !this._state.date_to || !this._state.destination || !this._state.base_price;
-  }
-
   /**
 	 * Сохраняет выбранные данные из стейта в реальные данные
 	 * @param {evt} event событие на кнопке сохранения
 	 */
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-
-    if (this.#hasEmptyFormFields()) {
-      return;
-    }
 
     this.#handleFormSubmit(EditItemListEventsView.parseStateToTripPoint(this._state));
   };
@@ -482,14 +475,17 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    */
   #dateChangeHandler = (selectedDates, dateStr, instance) => {
     // dateStr default value this library
+    if (!dateStr) {
+      return;
+    }
     const dateInUtc = getUtcTimeFromLocal(selectedDates);
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
-        'date_from': new Date(dateInUtc).toISOString()
+        'date_from': instance !== null ? new Date(dateInUtc).toISOString() : null
       });
     } else if (instance === this.#flatpickrDateTo) {
       this.updateElement({
-        'date_to': new Date(dateInUtc).toISOString()
+        'date_to': instance ? new Date(dateInUtc).toISOString() : ''
       });
     }
 
@@ -510,7 +506,11 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   static parseStateToTripPoint(state) {
     const tripPoint = { ...state };
     tripPoint.offers = tripPoint.offers.map((offer) => offer.id);
-    tripPoint.destination = tripPoint.destination.id;
+    if (!tripPoint.destination){
+      tripPoint.destination = null;
+    } else {
+      tripPoint.destination = tripPoint.destination.id;
+    }
 
     delete tripPoint.allOffers;
     delete tripPoint.isDisabled;
