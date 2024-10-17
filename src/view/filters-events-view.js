@@ -15,7 +15,9 @@ function createFiltersEventsTemplate(filters, currentFilterType) {
                 type="radio"
                 name="trip-filter"
                 value="${filter.type}"
-                ${filter.type === currentFilterType && 'checked'}>
+                ${filter.type === currentFilterType && 'checked'}
+                 ${filter.count === 0 ? 'disabled' : ''}
+              >
               <label class="trip-filters__filter-label" for="filter-${filter.type}">${filter.type}</label>
             </div>
           `)).join('')}
