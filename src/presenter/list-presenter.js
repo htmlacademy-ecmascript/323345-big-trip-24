@@ -35,7 +35,6 @@ export default class ListPresenter {
 
   #sortComponent = null;
   #currentSortType = SortType.DAY;
-  #filterType = FilterType.EVERYTHING;
   #isLoading = true;
 
   #uiBlocker = new UiBlocker({
@@ -72,9 +71,8 @@ export default class ListPresenter {
   }
 
   get tripPoints() {
-    this.#filterType = this.#filtersModel.filter;
     const tripPoints = this.#pointsTripModel.points;
-    const filteredTripPoints = filter[this.#filterType](tripPoints);
+    const filteredTripPoints = filter[this.#filtersModel.filter](tripPoints);
     switch (this.#currentSortType) {
       case SortType.DAY:
         return filteredTripPoints.sort(sortEventsByDay);
