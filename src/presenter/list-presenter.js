@@ -75,7 +75,6 @@ export default class ListPresenter {
     this.#filterType = this.#filtersModel.filter;
     const tripPoints = this.#pointsTripModel.points;
     const filteredTripPoints = filter[this.#filterType](tripPoints);
-
     switch (this.#currentSortType) {
       case SortType.DAY:
         return filteredTripPoints.sort(sortEventsByDay);
@@ -90,6 +89,7 @@ export default class ListPresenter {
 
   init(failedLoadViewComonent) {
     /** Отрисовка всех компонентов путешествия */
+    render(this.#listComponent, this.#listContainer);
     this.#renderList(failedLoadViewComonent);
   }
 
@@ -107,8 +107,6 @@ export default class ListPresenter {
 
   #renderList(failedLoadViewComonent) {
 
-    render(this.#listComponent, this.#listContainer);
-
     if (this.#isLoading) {
       this.#renderMessageLoadingComponent();
       if (failedLoadViewComonent) {
@@ -117,13 +115,13 @@ export default class ListPresenter {
       return;
     }
 
-    this.#renderSort();
     if (this.#pointsTripModel.points.length === 0) {
       /** Если список событий пуст, то отрисовываем сообщение */
       this.#renderNoTripEventsComponent();
       return;
     }
 
+    this.#renderSort();
     /** Рендерим список событий */
     this.#renderAllTripEvents();
 
@@ -253,7 +251,7 @@ export default class ListPresenter {
 
   #renderNoTripEventsComponent() {
     this.#noTripEventsComponent = new MessageEventsView({
-      filterType: this.#filterType,
+      filterType: this.#filtersModel.filter,
     });
     render(this.#noTripEventsComponent, this.#listComponent.element);
   }
