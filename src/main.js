@@ -89,7 +89,6 @@ Promise.all(
 
   headerPresenter.init().finally(() => {
     render(buttonAddNewEventComponent, headerContainer);
-
   });
 })
   .catch((err) => {

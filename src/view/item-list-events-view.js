@@ -1,5 +1,5 @@
 import he from 'he';
-import { humanizeEventDate, getDuration } from '../utils/time.js';
+import { humanizeEventDate, getDuration, getUtcTimeFromLocal } from '../utils/time.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(offers) {
@@ -28,9 +28,12 @@ function createItemListEventsTemplate(tripPoint, destination, offers) {
     is_favorite: isFavorite
   } = tripPoint;
 
+  const dateFromLocal = getUtcTimeFromLocal(dateFrom);
+  const dateToLocal = getUtcTimeFromLocal(dateTo);
+
   const date = humanizeEventDate(dateFrom, 'date') ? humanizeEventDate(dateFrom, 'date') : '';
-  const startTime = humanizeEventDate(dateFrom, 'time') ? humanizeEventDate(dateFrom, 'time') : '';
-  const endTime = humanizeEventDate(dateTo, 'time') ? humanizeEventDate(dateTo, 'time') : '';
+  const startTime = humanizeEventDate(dateFromLocal, 'time') ? humanizeEventDate(dateFromLocal, 'time') : '';
+  const endTime = humanizeEventDate(dateToLocal, 'time') ? humanizeEventDate(dateToLocal, 'time') : '';
   const datetime = humanizeEventDate(dateFrom, 'datetime');
   const isFavoriteClass = isFavorite
     ? 'event__favorite-btn--active'
@@ -46,7 +49,7 @@ function createItemListEventsTemplate(tripPoint, destination, offers) {
                 <h3 class="event__title">${type} ${destination ? he.encode(destination.name) : ''}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
-                    <time class="event__start-time" datetime="${datetime}">${startTime}</time>
+                    <time class="event__start-time" datetime="${dateFrom}">${startTime}</time>
                     —
                     <time class="event__end-time" datetime="${dateTo}">${endTime}</time>
                   </p>
