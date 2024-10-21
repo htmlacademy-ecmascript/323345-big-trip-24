@@ -102,6 +102,11 @@ export default class ListPresenter {
     this.#newTripPointPresenter.init();
   }
 
+  checkPointsLength() {
+    if (this.#pointsTripModel.points.length === 0) {
+      this.#renderNoTripEventsComponent();
+    }
+  }
 
   #renderList(failedLoadViewComonent) {
 

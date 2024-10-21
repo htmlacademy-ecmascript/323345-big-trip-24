@@ -54,6 +54,7 @@ const buttonAddNewEventComponent = new ButtonAddNewEventView({
 
 function handleNewTripPointFormClose() {
   buttonAddNewEventComponent.element.disabled = false;
+  listPresenter.checkPointsLength();
 }
 
 function handleButtonNewPointClick() {

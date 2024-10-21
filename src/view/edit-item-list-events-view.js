@@ -122,8 +122,12 @@ function createEditItemListEventsTemplate(
     isSaving,
     isDeleting,
   } = tripPoint;
-  const timeStart = humanizeEventDate(dateFrom, 'eventTime') ? humanizeEventDate(dateFrom, 'eventTime') : '';
-  const timeEnd = humanizeEventDate(dateTo, 'eventTime') ? humanizeEventDate(dateTo, 'eventTime') : '';
+
+  const dateFromLocal = dateFrom !== '' ? getUtcTimeFromLocal(dateFrom) : '';
+  const dateToLocal = dateTo !== '' ? getUtcTimeFromLocal(dateTo) : '';
+
+  const startTime = humanizeEventDate(dateFromLocal, 'eventTime') ? humanizeEventDate(dateFromLocal, 'eventTime') : '';
+  const endTime = humanizeEventDate(dateToLocal, 'eventTime') ? humanizeEventDate(dateToLocal, 'eventTime') : '';
 
   return (`
     <li class="trip-events__item">
@@ -162,10 +166,10 @@ function createEditItemListEventsTemplate(
 
           <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${timeStart}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startTime}">
             —
             <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${timeEnd}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endTime}">
           </div>
 
           <div class="event__field-group  event__field-group--price">

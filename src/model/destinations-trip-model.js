@@ -14,12 +14,12 @@ export default class DestinationsTripModel {
   }
 
   getDestinationById(points) {
-    return this.#destinations.filter((dest) => dest.id === points)[0];
+    return this.#destinations.find((dest) => dest.id === points);
   }
 
   getDestinationByName(destinationName) {
     return this.#destinations
-      .filter((destinationItem) => destinationItem.name === destinationName)[0];
+      .find((destinationItem) => destinationItem.name === destinationName);
   }
 
 
