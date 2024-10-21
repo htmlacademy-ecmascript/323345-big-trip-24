@@ -28,12 +28,9 @@ function createItemListEventsTemplate(tripPoint, destination, offers) {
     is_favorite: isFavorite
   } = tripPoint;
 
-  const dateFromLocal = getUtcTimeFromLocal(dateFrom);
-  const dateToLocal = getUtcTimeFromLocal(dateTo);
-
   const date = humanizeEventDate(dateFrom, 'date') ? humanizeEventDate(dateFrom, 'date') : '';
-  const startTime = humanizeEventDate(dateFromLocal, 'time') ? humanizeEventDate(dateFromLocal, 'time') : '';
-  const endTime = humanizeEventDate(dateToLocal, 'time') ? humanizeEventDate(dateToLocal, 'time') : '';
+  const startTime = humanizeEventDate(dateFrom, 'time') ? humanizeEventDate(dateFrom, 'time') : '';
+  const endTime = humanizeEventDate(dateTo, 'time') ? humanizeEventDate(dateTo, 'time') : '';
   const datetime = humanizeEventDate(dateFrom, 'datetime');
   const isFavoriteClass = isFavorite
     ? 'event__favorite-btn--active'

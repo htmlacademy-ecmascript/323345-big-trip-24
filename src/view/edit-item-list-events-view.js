@@ -3,7 +3,7 @@ import he from 'he';
 
 import {EVENT_TYPES} from '../const/const.js';
 import { capitalizeFirstLetter } from '../utils/utils.js';
-import { humanizeEventDate, getUtcTimeFromLocal } from '../utils/time.js';
+import { humanizeEventDate } from '../utils/time.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
 
@@ -123,11 +123,8 @@ function createEditItemListEventsTemplate(
     isDeleting,
   } = tripPoint;
 
-  const dateFromLocal = dateFrom !== '' ? getUtcTimeFromLocal(dateFrom) : '';
-  const dateToLocal = dateTo !== '' ? getUtcTimeFromLocal(dateTo) : '';
-
-  const startTime = humanizeEventDate(dateFromLocal, 'eventTime') ? humanizeEventDate(dateFromLocal, 'eventTime') : '';
-  const endTime = humanizeEventDate(dateToLocal, 'eventTime') ? humanizeEventDate(dateToLocal, 'eventTime') : '';
+  const startTime = dateFrom !== '' ? new Date(humanizeEventDate(dateFrom, 'eventTime')) : '';
+  const endTime = dateTo !== '' ? new Date(humanizeEventDate(dateTo, 'eventTime')) : '';
 
   return (`
     <li class="trip-events__item">
@@ -388,7 +385,7 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     evt.preventDefault();
 
     this.updateElement({
-      'base_price': /^(\d+)$/.test(evt.target.value) ? parseInt(evt.target.value, 10) : this._state.base_price,
+      'base_price': /^(\d{1,5})$/.test(evt.target.value) ? parseInt(evt.target.value, 10) : this._state.base_price,
     });
   };
 
@@ -451,7 +448,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    * onClose - срабатывает при закрытии календаря
    */
   #setFlatpickrTripEvent() {
-
     this.#flatpickrDateFrom = flatpickr(this.element.querySelector('#event-start-time-1'), {
       enableTime: true,
       'time_24hr': true,
@@ -477,19 +473,18 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    * @param {*} dateStr Строка, представляющая выбранную дату или диапазон дат в формате, заданном в настройках плагина.
    * @param {*} instance Объект, представляющий текущий экземпляр плагина flatpickr.
    */
-  #dateChangeHandler = (selectedDates, dateStr, instance) => {
+  #dateChangeHandler = ([selectedDates], dateStr, instance) => {
     // dateStr default value this library
     if (!dateStr) {
       return;
     }
-    const dateInUtc = getUtcTimeFromLocal(selectedDates);
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
-        'date_from': instance !== null ? new Date(dateInUtc).toISOString() : null
+        'date_from': instance !== null ? selectedDates : null
       });
     } else if (instance === this.#flatpickrDateTo) {
       this.updateElement({
-        'date_to': instance ? new Date(dateInUtc).toISOString() : ''
+        'date_to': instance ? selectedDates : ''
       });
     }
 
