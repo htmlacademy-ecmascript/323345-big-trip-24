@@ -38,16 +38,16 @@ export default class HeaderPresenter {
     if (this.#offersTripModel.offers.length === 0) {
       await this.#offersTripModel.init();
     }
-    if (this.#pointsTripModel.points.length === 0) {
-      await this.#pointsTripModel.init();
-    }
+
     if (this.#destinationsTripModel.destinations.length === 0) {
       await this.#pointsTripModel.init();
     }
 
     this.#pointsTrip = this.#pointsTripModel.points;
 
-    this.#renderTripHeader();
+    if (this.#pointsTrip.length !== 0) {
+      this.#renderTripHeader();
+    }
   }
 
 
@@ -69,10 +69,6 @@ export default class HeaderPresenter {
     replace(this.#headerTripComponent, prevHeaderTripComponent);
     remove(prevHeaderTripComponent);
 
-    if (this.#pointsTrip.length === 0) {
-      remove(this.#headerTripComponent);
-      this.#headerTripComponent = null;
-    }
   }
 
   #handleModelEvent = () => {
@@ -118,7 +114,7 @@ export default class HeaderPresenter {
     const allDestinations = this.#pointsTrip.map((point) => this.#destinationsTripModel.getDestinationById(point.destination).name);
     const allDestinationsNames = (allDestinations.length > MAX_DESTINATION_NAME_IN_TITLE)
       ? `${allDestinations.at(0)} &mdash; &hellip; &mdash; ${allDestinations.at(-1)}`
-      : allDestinations.map((destination) => (destination.name)).join(' &mdash; ');
+      : allDestinations.join(' &mdash; ');
 
     return allDestinationsNames ;
   }

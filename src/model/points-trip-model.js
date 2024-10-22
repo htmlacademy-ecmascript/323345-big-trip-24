@@ -1,5 +1,6 @@
 import { UpdateType } from '../const/const.js';
 import Observable from '../framework/observable.js';
+import { getUtcTimeFromLocal } from '../utils/time.js';
 export default class PointsTripModel extends Observable {
   #dataPoints = [];
   #pointsApiService = null;
@@ -15,7 +16,8 @@ export default class PointsTripModel extends Observable {
 
   async init() {
     try {
-      this.#dataPoints = await this.#pointsApiService.points;
+      const response = await this.#pointsApiService.points;
+      this.#dataPoints = response.map(this.#adapteToClientTime);
     } catch (err) {
       throw new Error('points not found');
     }
@@ -31,7 +33,8 @@ export default class PointsTripModel extends Observable {
     }
 
     try {
-      const updatePoint = await this.#pointsApiService.updatePoint(update);
+      const response = await this.#pointsApiService.updatePoint(update);
+      const updatePoint = this.#adapteToClientTime(response);
 
       this.#dataPoints = this.#dataPoints.map(
         (item) => (item.id === updatePoint.id ? updatePoint : item));
@@ -44,7 +47,8 @@ export default class PointsTripModel extends Observable {
 
   async addPoint(updateType, update){
     try {
-      const newPoint = await this.#pointsApiService.addPoint(update);
+      const response = await this.#pointsApiService.addPoint(update);
+      const newPoint = this.#adapteToClientTime(response);
       this.#dataPoints = [
         newPoint,
         ...this.#dataPoints
@@ -74,5 +78,14 @@ export default class PointsTripModel extends Observable {
     } catch(err) {
       throw new Error('Can\'t delete point', err);
     }
+  }
+
+  #adapteToClientTime(point) {
+    const adaptedPoint = {
+      ...point,
+      'date_from': new Date(getUtcTimeFromLocal(point.date_from)),
+      'date_to': new Date(getUtcTimeFromLocal(point.date_to)),
+    };
+    return adaptedPoint;
   }
 }

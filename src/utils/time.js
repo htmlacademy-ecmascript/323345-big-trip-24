@@ -52,19 +52,24 @@ function getDuration(startTime, endTime) {
 
   if (minutesLeft >= DAY_HAS_MINUTES) {
     const days = Math.floor(minutesLeft / DAY_HAS_MINUTES);
-    dayDuration = `${days}D`;
+    dayDuration = days < 10 ? `0${days}D` : `${days}D`;
     minutesLeft = minutesLeft - days * DAY_HAS_MINUTES;
   }
 
   if (minutesLeft >= HOUR_HAS_MINUTES) {
     const hours = Math.floor(minutesLeft / HOUR_HAS_MINUTES);
-    hoursDuration = `${hours}H`;
+    hoursDuration = hours < 10 ? `0${hours}H` : `${hours}H`;
     minutesLeft = minutesLeft - hours * HOUR_HAS_MINUTES;
   }
 
-  minutesDuration = `${minutesLeft}M`;
+  minutesDuration = minutesLeft < 10 ? `0${minutesLeft}M` : `${minutesLeft}M`;
 
-  return (`${dayDuration} ${hoursDuration} ${minutesDuration}`);
+  dayDuration = !dayDuration ? '00D' : dayDuration;
+  hoursDuration = !hoursDuration ? '00H' : hoursDuration;
+  minutesDuration = !minutesDuration ? '00M' : minutesDuration;
+
+
+  return `${dayDuration} ${hoursDuration} ${minutesDuration}`;
 }
 
 export { humanizeEventDate, getDuration, getUtcTimeFromLocal };
