@@ -1,6 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
 import FiltersEventsView from '../view/filters-events-view.js';
-import {FilterType, UpdateType} from '../const/const.js';
+import { FilterType, UpdateType } from '../const/const.js';
 import { filter } from '../utils/filter.js';
 
 

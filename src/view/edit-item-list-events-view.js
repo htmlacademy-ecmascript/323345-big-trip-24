@@ -1,7 +1,7 @@
 import flatpickr from 'flatpickr';
 import he from 'he';
 
-import {EVENT_TYPES} from '../const/const.js';
+import { EVENT_TYPES } from '../const/const.js';
 import { capitalizeFirstLetter } from '../utils/utils.js';
 import { humanizeEventDate } from '../utils/time.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
@@ -257,7 +257,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
   }
 
   get template() {
-
     return createEditItemListEventsTemplate(this._state, this.#destinationNames, this.#isNewPoint);
   }
 
@@ -265,7 +264,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
    * Группирует все обработчики событий
    */
   _restoreHandlers() {
-
     this.element.querySelector('.event.event--edit')
       .addEventListener('submit', this.#formSubmitHandler);
 

@@ -1,5 +1,5 @@
 import he from 'he';
-import { humanizeEventDate, getDuration, getUtcTimeFromLocal } from '../utils/time.js';
+import { humanizeEventDate, getDuration } from '../utils/time.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createOffersTemplate(offers) {
