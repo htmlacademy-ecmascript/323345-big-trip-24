@@ -261,9 +261,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     return createEditItemListEventsTemplate(this._state, this.#destinationNames, this.#isNewPoint);
   }
 
-  /**
-   * Группирует все обработчики событий
-   */
   _restoreHandlers() {
     this.element.querySelector('.event.event--edit')
       .addEventListener('submit', this.#formSubmitHandler);
@@ -308,9 +305,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     );
   }
 
-  /**
-   * Удаляет элемент flatpickr
-   */
   removeElement() {
     super.removeElement();
 
@@ -325,11 +319,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
   }
 
-  /**
-	 * Выбираем нужные предложения
-	 * @param {evt} event событие на каждом предложении
-	 * @returns выбранныое предложение
-	 */
   #offersChangeHandler = (evt) => {
     evt.preventDefault();
 
@@ -353,12 +342,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     });
   };
 
-  /**
-	 * Выбираем вид путешествия и согласно выбранному типу
-	 *  отображаем возможные офферы
-	 * @param {evt} event событие на изменении типа путешествия
-	 * @returns Все виды офферов для подобного типа путешествия
-	 */
   #eventTypeChangeHandler = (evt) => {
     evt.preventDefault();
 
@@ -375,11 +358,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     });
   };
 
-  /**
-	 * Сохранет ценну в стейт
-	 * @param {evt} event событие на изменении цены
-	 * @returns сохраняет ценну
-	 */
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
 
@@ -388,10 +366,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     });
   };
 
-  /**
-   * Закрывает и сбрасывает стейт до начального.
-   * @param {evt} event событие на кнопке закрытия
-   */
   #closeFormClickHandler = (evt) => {
     evt.preventDefault();
 
@@ -403,12 +377,6 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     this.#handleDeleteClick(EditItemListEventsView.parseStateToTripPoint(this._state));
   };
 
-  /**
-   * Ищет пункт назначения по названию сравнивая его с названиями
-   *  пунктов назначения и закидывает выбранный в стейт
-   * @param {evt} event - событие на поле ввода
-   * @returns {string} - название пункта назначения
-   */
   #destinationInputHandler = (evt) => {
     evt.preventDefault();
 
@@ -428,24 +396,12 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     }
   };
 
-  /**
-	 * Сохраняет выбранные данные из стейта в реальные данные
-	 * @param {evt} event событие на кнопке сохранения
-	 */
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
 
     this.#handleFormSubmit(EditItemListEventsView.parseStateToTripPoint(this._state));
   };
 
-  /**
-   *  Настройки календаря для flatpickr
-   * enableTime: true - включает ввод времени
-   * dateFormat: 'd/m/y H:i' - формат даты
-   * defaultDate дата по умолчанию
-   * maxDate, minDate - максимальная и минимальная дата
-   * onClose - срабатывает при закрытии календаря
-   */
   #setFlatpickrTripEvent() {
     this.#flatpickrDateFrom = flatpickr(this.element.querySelector('#event-start-time-1'), {
       enableTime: true,
@@ -466,17 +422,11 @@ export default class EditItemListEventsView extends AbstractStatefulView {
     });
   }
 
-  /**
-   *
-   * @param {*} selectedDates Массив выбранных дат. Если пользователь выбрал один день, то в массиве будет только одна дата. Если пользователь выбрал диапазон дат, то в массиве будут две даты: начало и конец диапазона.
-   * @param {*} dateStr Строка, представляющая выбранную дату или диапазон дат в формате, заданном в настройках плагина.
-   * @param {*} instance Объект, представляющий текущий экземпляр плагина flatpickr.
-   */
   #dateChangeHandler = ([selectedDates], dateStr, instance) => {
-    // dateStr default value this library
     if (!dateStr) {
       return;
     }
+
     if (instance === this.#flatpickrDateFrom) {
       this.updateElement({
         'date_from': instance !== null ? selectedDates : null

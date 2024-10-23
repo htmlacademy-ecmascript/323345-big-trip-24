@@ -14,7 +14,6 @@ function sortEventsByDay (eventA, eventB) {
 }
 
 function sortEventsByTime (eventA, eventB) {
-
   if (dayjs.utc(eventA.date_from).diff(dayjs.utc(eventA.date_to)) <
       dayjs.utc(eventB.date_from).diff(dayjs.utc(eventB.date_to))) {
     return -1;

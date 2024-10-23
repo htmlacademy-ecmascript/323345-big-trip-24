@@ -39,7 +39,7 @@ function getUtcTimeFromLocal(localDate) {
  * Возвращает продолжительность между двумя датами в человеко-читаемом форме
  * @param {string} startTime - Start time in ISO format.
  * @param {string} endTime - End time in ISO format.
- * @returns {string} - Вернет разницу между датами в формате 1D 15H 39M
+ * @returns {string} - Вернет разницу между датами в формате 1D 00H 39M
  */
 function getDuration(startTime, endTime) {
   const differensInMinutes = dayjs.utc(endTime).diff(dayjs.utc(startTime), 'm');

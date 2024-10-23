@@ -50,8 +50,6 @@ export default class HeaderPresenter {
     }
   }
 
-
-  /** Создание шапки сайта */
   #renderTripHeader() {
     const prevHeaderTripComponent = this.#headerTripComponent;
 
@@ -98,6 +96,7 @@ export default class HeaderPresenter {
       eventDateStart = this.#pointsTrip.at(0).date_from;
       eventDateEnd = this.#pointsTrip.at(-1).date_to;
     }
+
     const date = {
       eventDateStart: humanizeEventDate(eventDateStart, 'headerDate'),
       eventDateEnd: humanizeEventDate(eventDateEnd, 'headerDate')

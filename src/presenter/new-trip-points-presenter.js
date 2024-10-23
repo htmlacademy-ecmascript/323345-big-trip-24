@@ -42,7 +42,6 @@ export default class NewTripPointPresenter {
       onCloseFormClick: this.#handleFormCloseClick,
       isNewPoint: true,
     });
-
     render(this.#tripPointEditComponent, this.#pointComponentContainer, RenderPosition.AFTERBEGIN);
 
     document.addEventListener('keydown', this.#escKeyDownHandler);
@@ -76,12 +75,10 @@ export default class NewTripPointPresenter {
         isDeleting: false,
       });
     };
-
     this.#tripPointEditComponent.shake(resetFormState);
   }
 
   #handleFormSubmit = (tripPoint) => {
-
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.MINOR,
