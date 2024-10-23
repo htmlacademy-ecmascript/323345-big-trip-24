@@ -3,7 +3,7 @@ import { SortType, FilterType, UpdateType, UserAction } from '../const.js';
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/sort.js';
 import { filter } from '../utils/filter.js';
 
-import NewTripPointPresenter from './new-trip-points-presenter.js';
+import NewTripPointPresenter from './new-trip-point-presenter.js';
 import TripPointsPresenter from './trip-points-presenter.js';
 
 import SortEventsView from '../view/sort-events-view.js';
