@@ -13,7 +13,6 @@ export default class MessageEventsView extends AbstractView {
   #filterType = null;
 
   constructor({filterType}) {
-
     super();
     this.#filterType = filterType;
   }
