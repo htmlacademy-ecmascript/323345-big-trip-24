@@ -15,7 +15,7 @@ import FiltersModel from './model/filters-model.js';
 import PointsApiService from './api-service/points-api-service.js';
 import OffersApiService from './api-service/offers-api-service.js';
 import DestinationsApiService from './api-service/destinations-api-service.js';
-import { AUTHORIZATION, END_POINT } from './const/api-const.js';
+import { AUTHORIZATION, END_POINT } from './const.js';
 
 import ButtonAddNewEventView from './view/button-add-new-event-view.js';
 import FailedLoadView from './view/failed-load-view.js';

@@ -1,5 +1,5 @@
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { UserAction, UpdateType, EMPTY_POINT } from '../const/const.js';
+import { UserAction, UpdateType, EMPTY_POINT } from '../const.js';
 import EditItemListEventsView from '../view/edit-item-list-events-view.js';
 
 
@@ -42,7 +42,6 @@ export default class NewTripPointPresenter {
       onCloseFormClick: this.#handleFormCloseClick,
       isNewPoint: true,
     });
-
     render(this.#tripPointEditComponent, this.#pointComponentContainer, RenderPosition.AFTERBEGIN);
 
     document.addEventListener('keydown', this.#escKeyDownHandler);
@@ -76,12 +75,10 @@ export default class NewTripPointPresenter {
         isDeleting: false,
       });
     };
-
     this.#tripPointEditComponent.shake(resetFormState);
   }
 
   #handleFormSubmit = (tripPoint) => {
-
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.MINOR,

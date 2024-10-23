@@ -1,5 +1,5 @@
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { SortType, FilterType, UpdateType, UserAction } from '../const/const.js';
+import { SortType, FilterType, UpdateType, UserAction } from '../const.js';
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/sort.js';
 import { filter } from '../utils/filter.js';
 
@@ -65,7 +65,7 @@ export default class ListPresenter {
       onDestroy: onNewTripPointClose,
     });
 
-    /** Подписываемся на изменение данных модели и прокидываем callback */
+
     this.#pointsTripModel.addObserver(this.#handleModelEvent);
     this.#filtersModel.addObserver(this.#handleModelEvent);
   }
@@ -81,12 +81,11 @@ export default class ListPresenter {
       case SortType.PRICE:
         return filteredTripPoints.sort(sortEventsByPrice);
     }
-
     return filteredTripPoints;
   }
 
   init(failedLoadViewComonent) {
-    /** Отрисовка всех компонентов путешествия */
+
     render(this.#listComponent, this.#listContainer);
     this.#renderList(failedLoadViewComonent);
   }
@@ -112,26 +111,23 @@ export default class ListPresenter {
 
     if (this.#isLoading) {
       this.#renderMessageLoadingComponent();
+
       if (failedLoadViewComonent) {
         remove(this.#tripLoadingComponent);
       }
+
       return;
     }
 
     if (this.#pointsTripModel.points.length === 0) {
-      /** Если список событий пуст, то отрисовываем сообщение */
       this.#renderNoTripEventsComponent();
       return;
     }
 
     this.#renderSort();
-    /** Рендерим список событий */
     this.#renderAllTripEvents();
-
   }
 
-
-  /** Обновление компонента с событиями путешествия */
   #handleModeChange = () => {
     this.#newTripPointPresenter.destroy();
     this.#tripPointsPresentersId.forEach((presenter) => presenter.resetView());
@@ -150,7 +146,6 @@ export default class ListPresenter {
 
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-
         this.#tripPointsPresentersId.get(update.id).setSaving();
         try {
           await this.#pointsTripModel.updatePoint(updateType, update);
@@ -160,7 +155,6 @@ export default class ListPresenter {
         break;
 
       case UserAction.ADD_POINT:
-
         this.#newTripPointPresenter.setSaving();
         try {
           await this.#pointsTripModel.addPoint(updateType, update);
@@ -170,7 +164,6 @@ export default class ListPresenter {
         break;
 
       case UserAction.DELETE_POINT:
-
         this.#tripPointsPresentersId.get(update.id).setDeleting();
         try {
           await this.#pointsTripModel.deletePoint(updateType, update);
@@ -210,31 +203,24 @@ export default class ListPresenter {
     }
   };
 
-  /** Отрисовка кнопок cортировки событий путешествия */
   #renderSort() {
     this.#sortComponent = new SortEventsView({
       onSortTypeChange: this.#handleSortTypeChange,
       currentSortType: this.#currentSortType,
     });
-
     render(this.#sortComponent, this.#listContainer, RenderPosition.AFTERBEGIN);
   }
 
-  /** Перерисовывает события согласно типу сортировки
-  * @param {string} sortType - тип сортировки
-  * @run Отрисовку всех событий путешествия согласно типу сортировки
-  */
   #handleSortTypeChange = (sortType) => {
     if (this.#currentSortType === sortType) {
       return;
     }
+
     this.#currentSortType = sortType;
     this.#clearTripPointList();
     this.#renderList();
   };
 
-
-  /** Создание события путешествия - презентер */
   #renderTripPoint(tripPoint) {
     if (this.#noTripEventsComponent) {
       remove(this.#noTripEventsComponent);
@@ -249,7 +235,6 @@ export default class ListPresenter {
     });
 
     tripPointsPresenter.init(tripPoint);
-
     this.#tripPointsPresentersId.set(tripPoint.id, tripPointsPresenter);
   }
 
@@ -264,14 +249,11 @@ export default class ListPresenter {
     render(this.#noTripEventsComponent, this.#listComponent.element);
   }
 
-
-  /** Создание списка событий путешествия */
   #renderAllTripEvents() {
     this.#renderNoTripEventsComponent();
     this.tripPoints.forEach((tripPoint) => this.#renderTripPoint(tripPoint));
   }
 
-  /** Очистка компонента с событиями путешествия */
   #clearTripPointList({ resetSortType = false } = {}) {
 
     this.#newTripPointPresenter.destroy();

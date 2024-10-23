@@ -1,6 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
 import FiltersEventsView from '../view/filters-events-view.js';
-import { FilterType, UpdateType } from '../const/const.js';
+import {FilterType, UpdateType} from '../const.js';
 import { filter } from '../utils/filter.js';
 
 
@@ -26,22 +26,18 @@ export default class FiltersPresenter {
     return [
       {
         type: FilterType.EVERYTHING,
-        name: 'EVERYTHING',
         count: filter[FilterType.EVERYTHING](points).length,
       },
       {
         type: FilterType.FUTURE,
-        name: 'FUTURE',
         count: filter[FilterType.FUTURE](points).length,
       },
       {
         type: FilterType.PRESENT,
-        name: 'PRESENT',
         count: filter[FilterType.PRESENT](points).length,
       },
       {
         type: FilterType.PAST,
-        name: 'PAST',
         count: filter[FilterType.PAST](points).length,
       },
     ];

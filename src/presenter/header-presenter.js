@@ -1,6 +1,6 @@
 import { render, remove, replace, RenderPosition } from '../framework/render.js';
 import { humanizeEventDate } from '../utils/time.js';
-import { MAX_DESTINATION_NAME_IN_TITLE } from '../const/header-const.js';
+import { MAX_DESTINATION_NAME_IN_TITLE } from '../const.js';
 
 import HeaderTripInfoView from '../view/header-trip-info-view.js';
 
@@ -50,8 +50,6 @@ export default class HeaderPresenter {
     }
   }
 
-
-  /** Создание шапки сайта */
   #renderTripHeader() {
     const prevHeaderTripComponent = this.#headerTripComponent;
 
@@ -98,6 +96,7 @@ export default class HeaderPresenter {
       eventDateStart = this.#pointsTrip.at(0).date_from;
       eventDateEnd = this.#pointsTrip.at(-1).date_to;
     }
+
     const date = {
       eventDateStart: humanizeEventDate(eventDateStart, 'headerDate'),
       eventDateEnd: humanizeEventDate(eventDateEnd, 'headerDate')

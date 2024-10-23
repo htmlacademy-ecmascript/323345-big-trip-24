@@ -1,6 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
-import { UserAction, UpdateType } from '../const/const.js';
-import { Mode } from '../const/change-mode-const.js';
+import { UserAction, UpdateType } from '../const.js';
+import { Mode } from '../const.js';
 
 import ItemListEventsView from '../view/item-list-events-view.js';
 import EditItemListEventsView from '../view/edit-item-list-events-view.js';
@@ -35,12 +35,12 @@ export default class TripPointsPresenter {
     if (this.#offersModel.offers.length === 0) {
       await this.#offersModel.init();
     }
+
     if (this.#destinationsModel.destinations.length === 0) {
       await this.#destinationsModel.init();
     }
 
     this.#tripPoint = tripPoint;
-
     this.#createTripPointComponent(tripPoint);
   }
 
@@ -56,7 +56,6 @@ export default class TripPointsPresenter {
       onFavoriteClick: this.#handleFavoriteClick,
     });
 
-    /** Инициализируем компонент для редактирования события */
     this.#createTripPointEditComponent(tripPoint);
 
     if (prevTripPointComponent === null || prevTripPointEditComponent === null) {
@@ -76,9 +75,6 @@ export default class TripPointsPresenter {
     remove(prevTripPointEditComponent);
   }
 
-  /**
-   * Создает компонент для редактирования события
-   */
   #createTripPointEditComponent(tripPoint) {
     this.#tripPointEditComponent = new EditItemListEventsView({
       tripPoint,
@@ -97,9 +93,6 @@ export default class TripPointsPresenter {
     remove(this.#tripPointEditComponent);
   }
 
-  /**
-   * Метод для сброса компонента в начальное состояние
-   */
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#tripPointEditComponent.reset(this.#tripPoint);
@@ -142,10 +135,6 @@ export default class TripPointsPresenter {
     this.#tripPointEditComponent.shake(resetFormState);
   }
 
-  /**
-   * Регулирует поведение при нажатии на кнопку Esc
-   * @param {evt} event событие на кнопку Esc
-   */
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
@@ -154,11 +143,6 @@ export default class TripPointsPresenter {
     }
   };
 
-  /**
-   * Метод для редактирования события
-   * Записывает стейт редактируемого компонента
-   *  в начальные данные (сохраняет изменения)
-   */
   #replaceCardToForm() {
     replace(this.#tripPointEditComponent, this.#tripPointComponent);
     this.#tripPointEditComponent.reset(this.#tripPoint);
@@ -168,10 +152,6 @@ export default class TripPointsPresenter {
     this.#mode = Mode.EDITING;
   }
 
-  /**
-   * Метод для редактирования события
-   * Сбрасывает стейт редактируемого компонента
-   */
   #replaceFormToCard() {
     replace(this.#tripPointComponent, this.#tripPointEditComponent);
 
