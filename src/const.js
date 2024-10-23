@@ -49,6 +49,16 @@ const UpdateType = {
 
 const DisabledSortType = [SortType.EVENT, SortType.OFFERS];
 
+const AUTHORIZATION = 'Basic Student-24th-AcademicStream-323345-llSergey';
+const END_POINT = 'https://24.objects.htmlacademy.pro/big-trip';
+
+const MAX_DESTINATION_NAME_IN_TITLE = 3;
+
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+
 export {
   EVENT_TYPES,
   EMPTY_POINT,
@@ -56,5 +66,9 @@ export {
   SortType,
   UserAction,
   UpdateType,
-  DisabledSortType
+  DisabledSortType,
+  AUTHORIZATION,
+  END_POINT,
+  MAX_DESTINATION_NAME_IN_TITLE,
+  Mode,
 };

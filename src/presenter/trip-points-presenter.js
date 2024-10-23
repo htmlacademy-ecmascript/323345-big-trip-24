@@ -1,6 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
-import { UserAction, UpdateType } from '../const/const.js';
-import { Mode } from '../const/change-mode-const.js';
+import { UserAction, UpdateType } from '../const.js';
+import { Mode } from '../const.js';
 
 import ItemListEventsView from '../view/item-list-events-view.js';
 import EditItemListEventsView from '../view/edit-item-list-events-view.js';

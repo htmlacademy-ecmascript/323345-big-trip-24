@@ -1,4 +1,4 @@
-import { FilterType } from '../const/const.js';
+import { FilterType } from '../const.js';
 
 const filter = {
   [FilterType.EVERYTHING]: (pointsTrip) => pointsTrip,

@@ -1,6 +1,6 @@
 import { render, remove, replace, RenderPosition } from '../framework/render.js';
 import { humanizeEventDate } from '../utils/time.js';
-import { MAX_DESTINATION_NAME_IN_TITLE } from '../const/header-const.js';
+import { MAX_DESTINATION_NAME_IN_TITLE } from '../const.js';
 
 import HeaderTripInfoView from '../view/header-trip-info-view.js';
 

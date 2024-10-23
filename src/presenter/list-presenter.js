@@ -1,5 +1,5 @@
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { SortType, FilterType, UpdateType, UserAction } from '../const/const.js';
+import { SortType, FilterType, UpdateType, UserAction } from '../const.js';
 import { sortEventsByDay, sortEventsByTime, sortEventsByPrice } from '../utils/sort.js';
 import { filter } from '../utils/filter.js';
 
